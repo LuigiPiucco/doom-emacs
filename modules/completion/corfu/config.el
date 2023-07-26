@@ -163,6 +163,12 @@ Meant as :around advice for `corfu--recompute'."
   (add-hook! (org-mode markdown-mode) (+corfu--add-capf! #'cape-elisp-block))
   (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible))
 
+(use-package! yasnippet-capf
+  :after corfu
+  :config
+  (add-hook 'yas-minor-mode-hook
+            (lambda () (add-to-list 'completion-at-point-functions #'yasnippet-capf))))
+
 (use-package! corfu-terminal
   :when (not (display-graphic-p))
   :hook (corfu-mode . corfu-terminal-mode))

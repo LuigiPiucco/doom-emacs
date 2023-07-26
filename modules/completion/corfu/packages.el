@@ -9,3 +9,5 @@
   (package! orderless :pin "d6b402a89e234d0e6166247ed6025f9acc8b4d9a"))
 (when (modulep! :os tty)
   (package! corfu-terminal :pin "501548c3d51f926c687e8cd838c5865ec45d03cc"))
+(when (modulep! :editor snippets)
+  (package! yasnippet-capf :pin "40654214db7a44db3a99321447632b43a10fae57"))
