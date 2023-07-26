@@ -53,8 +53,9 @@ Note that changes are applied only after a cache reset, via
         corfu-count 16
         corfu-max-width 120
         corfu-preview-current 'insert
-        corfu-quit-at-boundary (if +corfu-want-multi-component 'separator t)
-        corfu-quit-no-match (if +corfu-want-multi-component 'separator t)
+        corfu-on-exact-match nil
+        corfu-quit-at-boundary (unless +corfu-want-multi-component 'separator t)
+        corfu-quit-no-match (unless +corfu-want-multi-component 'separator t)
         ;; In the case of +tng, TAB should be smart regarding completion;
         ;; However, it should otherwise behave like normal, whatever normal was.
         tab-always-indent (if (modulep! +tng) 'complete tab-always-indent))
@@ -98,19 +99,16 @@ Note that changes are applied only after a cache reset, via
 
 (use-package! cape
   :after corfu
-  :commands (cape-dabbrev
-             cape-file
-             cape-history
-             cape-keyword
-             cape-tex
-             cape-sgml
-             cape-rfc1345
-             cape-abbrev
-             cape-dict
-             cape-symbol
-             cape-line)
   :init
-  (add-to-list 'completion-at-point-functions #'cape-file))
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  :config
+  (when (and (modulep! :tools lsp) (not (modulep! :tools lsp +eglot)))
+    (advice-add #'lsp-completion-at-point :around #'cape-wrap-nonexclusive))
+  (when (modulep! :editor snippets)
+    (load! "+yas-capf.el")
+    (add-hook 'yas-minor-mode-hook
+              (lambda ()
+                (push #'yas-capf completion-at-point-functions)))))
 
 (use-package! kind-icon
   :when (modulep! +icons)

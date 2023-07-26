@@ -46,7 +46,7 @@ languages may lack code completion support altogether). Run ~$ doom doctor~ to
 find out if you're missing any dependencies. Note that corfu may have support
 for completions in languages that have no development intelligence, since it
 supports generic, context insensitive candidates such as file names or recurring
-words.
+words. Snippets may also appear in the candidate list if available.
 
 * TODO Usage
 #+begin_quote
@@ -111,21 +111,17 @@ with all candidates.
 * Configuration
 A few variables may be set to change behavior of this module:
 
-- +corfu-auto-delay ::
+- [[var:+corfu-auto-delay]] ::
   Number of seconds till completion occurs automatically. Defaults to 0.1.
-- +corfu-auto-prefix ::
+- [[var:+corfu-auto-prefix]] ::
   Number of characters till auto-completion starts to happen. Defaults to 2.
-- +corfu-want-multi-component ::
+- [[var:+corfu-want-multi-component]] ::
   Sets whether orderless-style matching should be supported with space as a
   separator.
-
-Additionally, if you prefer to never stop completion on [[kbd:][SPC]], add the following
-to your ~config.el~:
-
-#+begin_src emacs-lisp
-(map! :map corfu-map
-      :desc "insert separator" "C-SPC" #'corfu-insert-separator)
-#+end_src
+- [[var:corfu-on-exact-match]] ::
+  Configures behavior for exact matches. Its default is nil, and it's
+  recommended to leave it at that. Otherwise, single matches on snippet keys
+  expand immediately.
 
 * Troubleshooting
 [[doom-report:][Report an issue?]]
