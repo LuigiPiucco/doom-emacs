@@ -14,9 +14,33 @@
   (when (string= "finished" status)
     (yas-expand)))
 
+(defconst yas-capf--buffer-name "*yas-capf expansion*")
+
+(defun yas-capf--get-doc (cand)
+  (when-let ((template (get-text-property 0 'yas-template cand))
+             (maj-mode major-mode)
+             (buf (get-buffer-create yas-capf--buffer-name)))
+    (with-current-buffer buf
+      (erase-buffer)
+      (funcall maj-mode)
+      (yas-minor-mode)
+      (save-excursion
+        (yas-expand-snippet template)
+        (when (yas-active-snippets)
+          (let ((i 0))
+            (while (not (yas-next-field-will-exit-p 1))
+              (setq i (+ i 1))
+              (insert (format "<%d>" i))
+              (yas-next-field)))
+          (insert "<END>"))
+        (font-lock-ensure))
+      (insert "Expands to:" ?\n ?\n)
+      (current-buffer))))
+
 (defconst yas-capf--properties
   (list :annotation-function (lambda (_) "(Snippet)")
         :company-kind (lambda (_) 'snippet)
+        :company-doc-buffer #'yas-capf--get-doc
         :exit-function #'yas-capf--exit
         :exclusive 'no))
 "Return a list of extra properties for text at BEG through END."
