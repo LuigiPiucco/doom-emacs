@@ -4,9 +4,9 @@
 #+since:    3.0.0 (#7002)
 
 * Description :unfold:
-This module provides code completion, powered by [[https://github.com/minad/corfu][corfu]].
+This module provides code completion, powered by [[doom-package:corfu]].
 
-It is recommended to enable either this or [[doom-module::completion company]], in case you
+It is recommended to enable either this or [[doom-module:][:completion company]], in case you
 desire pre-configured auto-completion. Corfu is much lighter weight and focused,
 plus it's built on native Emacs functionality, whereas company is heavy and
 highly non-native, but has some extra features and more maturity.
@@ -23,12 +23,16 @@ highly non-native, but has some extra features and more maturity.
   Invoke completion on [[kbd:][TAB]]. When corfu is active, [[kbd:][TAB]] and [[kbd:][S-TAB]] will navigate
   the completion candidates. Arrow keys and evil-style movement are still
   supported.
+- +orderless ::
+  Pull in [[doom-package:orderless]] if necessary and apply multi-component
+  completion (still needed if [[:completion vertico]] is active).
 
 ** Packages
-- [[doom-package:][corfu]]
-- [[doom-package:][cape]]
-- [[doom-package:][kind-icon]] if [[doom-module:][:completion corfu +icons]]
-- [[doom-package:][corfu-terminal]] if [[doom-module:][:os tty]]
+- [[doom-package:corfu]]
+- [[doom-package:cape]]
+- [[doom-package:kind-icon]] if [[doom-module:][:completion corfu +icons]]
+- [[doom-package:orderless]] if [[doom-module:][:completion corfu +icons]]
+- [[doom-package:corfu-terminal]] if [[doom-module:][:os tty]]
   
 ** Hacks
 /No hacks documented for this module./
@@ -90,7 +94,7 @@ additional binds:
 | [[kbd:][S-TAB]]   | (when completing) Go to previous candidate |
 
 ** Searching with multiple keywords
-If the [[doom-module:][:completion vertico]] module is enabled, users can perform code completion
+If the ~+orderless~ flag is enabled, users can perform code completion
 with multiple search keywords by use of space as separator. More information can
 be found [[https://github.com/oantolin/orderless#company][here]]. Pressing [[kdb:][C-SPC]] again while completing inserts a space as
 separator. This allows searching with space-separated terms; each piece will
@@ -98,15 +102,12 @@ match individually and in any order, with smart casing. Pressing just [[kbd:][SP
 as normal and restarts completion, so that when typing sentences it doesn't try
 to complete the whole sentence instead of just the word.
 
-Without [[doom-module::completion vertico]], it still works, just not as intelligently, due to
-the lack of [[doom-package:orderless]].
-
-** Exporting to the minibuffer (requires [[doom-module::completion vertico]])
-When using the [[doom-module::completion vertico]] module, which pulls in the [[doom-package:consult]] package,
-the entries shown in the completion popup can be exported to a consult
-minibuffer, giving access to all the manipulations the vertico suite allows. For
-instance, one could use this to export with [[doom-package:embark]] via [[kbd:][C-c C-l]] and get a buffer
-with all candidates.
+** Exporting to the minibuffer (requires [[doom-module:][:completion vertico]])
+When using the [[doom-module::completion vertico]] module, which pulls in the
+[[doom-package:consult]] package, the entries shown in the completion popup can be
+exported to a consult minibuffer, giving access to all the manipulations the
+vertico suite allows. For instance, one could use this to export with
+[[doom-package:embark]] via [[kbd:][C-c C-l]] and get a buffer with all candidates.
 
 * Configuration
 A few variables may be set to change behavior of this module:

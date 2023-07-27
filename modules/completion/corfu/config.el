@@ -1,11 +1,5 @@
 ;;; completion/corfu/config.el -*- lexical-binding: t; -*-
 
-(defvar +corfu-want-multi-component t
-  "Enables multiple component search, with pieces separated by spaces.
-
-This allows search of non-contiguous unordered bits, for instance by typing
-\"tear rip\" to match \"rip-and-tear\". Notice the space, it does not break
-completion in this case.")
 (defvar +corfu-icon-height 0.9
   "The height applied to the icons (it is passed to both svg-lib and kind-icon).
 
@@ -32,20 +26,18 @@ Note that changes are applied only after a cache reset, via
   (add-to-list 'completion-styles 'partial-completion t)
   (add-to-list 'completion-styles 'initials t)
   (setq corfu-cycle t
-        corfu-separator (when +corfu-want-multi-component ?\s)
+        corfu-separator (when (modulep! +orderless) ?\s)
         corfu-preselect t
         corfu-count 16
         corfu-max-width 120
         corfu-preview-current 'insert
         corfu-on-exact-match nil
-        corfu-quit-at-boundary (unless +corfu-want-multi-component 'separator t)
-        corfu-quit-no-match (unless +corfu-want-multi-component 'separator t)
+        corfu-quit-at-boundary (if (modulep! +orderless) 'separator t)
+        corfu-quit-no-match (if (modulep! +orderless) 'separator t)
         ;; In the case of +tng, TAB should be smart regarding completion;
         ;; However, it should otherwise behave like normal, whatever normal was.
         tab-always-indent (if (modulep! +tng) 'complete tab-always-indent))
-  ;; Only done with :tools vertico active due to orderless. Alternatively, we
-  ;; could set it up here if it's not there.
-  (when (and +corfu-want-multi-component (modulep! :completion vertico))
+  (when (modulep! +orderless)
     (cond ((modulep! :tools lsp +eglot) (add-to-list 'completion-category-overrides '(eglot (styles orderless))))
           ((modulep! :tools lsp) (add-hook 'lsp-completion-mode-hook
                                            (defun doom--use-orderless-lsp-capf ()
@@ -54,7 +46,7 @@ Note that changes are applied only after a cache reset, via
   (map! (:unless (modulep! +tng)
           :desc "complete" "C-SPC" #'completion-at-point)
         (:map 'corfu-map
-              (:when +corfu-want-multi-component
+              (:when (modulep! +orderless)
                 :desc "insert separator" "C-SPC" #'corfu-insert-separator)
               (:when (modulep! +tng)
                 :desc "next" [tab] #'corfu-next
