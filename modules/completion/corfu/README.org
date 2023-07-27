@@ -111,9 +111,9 @@ with all candidates.
 * Configuration
 A few variables may be set to change behavior of this module:
 
-- [[var:+corfu-auto-delay]] ::
+- [[var:corfu-auto-delay]] ::
   Number of seconds till completion occurs automatically. Defaults to 0.1.
-- [[var:+corfu-auto-prefix]] ::
+- [[var:corfu-auto-prefix]] ::
   Number of characters till auto-completion starts to happen. Defaults to 2.
 - [[var:+corfu-want-multi-component]] ::
   Sets whether orderless-style matching should be supported with space as a

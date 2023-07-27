@@ -1,16 +1,5 @@
 ;;; completion/corfu/config.el -*- lexical-binding: t; -*-
 
-(defvar +corfu-auto-delay 0.1
-  "How long after point stands still will completion be called automatically,
-in seconds.
-
-Setting `corfu-auto-delay' directly may not work, as it needs to be set *before*
-enabling `corfu-mode'.")
-(defvar +corfu-auto-prefix 2
-  "How many characters should be typed before auto-complete starts to kick in.
-
-Setting `corfu-auto-prefix' directly may not work, as it needs to be set
-*before* enabling `corfu-mode'.")
 (defvar +corfu-want-multi-component t
   "Enables multiple component search, with pieces separated by spaces.
 
@@ -30,9 +19,10 @@ Note that changes are applied only after a cache reset, via
   :hook (doom-first-buffer . global-corfu-mode)
   :init
   ;; Auto-completion settings, must be set before calling `global-corfu-mode'.
+  ;; Due to lazy-loading, setting them in config.el works too.
   (setq corfu-auto t
-        corfu-auto-delay +corfu-auto-delay
-        corfu-auto-prefix +corfu-auto-prefix
+        corfu-auto-delay 0.1
+        corfu-auto-prefix 2
         corfu-excluded-modes '(erc-mode
                                circe-mode
                                help-mode
