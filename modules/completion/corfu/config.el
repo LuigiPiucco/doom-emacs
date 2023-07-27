@@ -28,13 +28,7 @@ Note that changes are applied only after a cache reset, via
                                help-mode
                                gud-mode
                                vterm-mode))
-
   :config
-  (when (and (modulep! :tools lsp) (not (modulep! :tools lsp +eglot)))
-    (add-hook 'lsp-mode-hook (defun doom--add-lsp-capf ()
-                               (add-to-list 'completion-at-point-functions (cape-capf-buster #'lsp-completion-at-point)))
-              ;; Below is so that context specific completions in cape come first.
-              :depth 1))
   (add-to-list 'completion-styles 'partial-completion t)
   (add-to-list 'completion-styles 'initials t)
   (setq corfu-cycle t
@@ -62,10 +56,6 @@ Note that changes are applied only after a cache reset, via
         (:map 'corfu-map
               (:when +corfu-want-multi-component
                 :desc "insert separator" "C-SPC" #'corfu-insert-separator)
-              (:when (modulep! :completion vertico)
-                :desc "move to minibuffer" "s-<down>" #'corfu-move-to-minibuffer
-                (:when (modulep! :editor evil)
-                  :desc "move to minibuffer" "s-j" #'corfu-move-to-minibuffer))
               (:when (modulep! +tng)
                 :desc "next" [tab] #'corfu-next
                 :desc "previous" [backtab] #'corfu-previous
@@ -75,33 +65,33 @@ Note that changes are applied only after a cache reset, via
   (when (modulep! :editor evil)
     (evil-collection-define-key 'insert 'corfu-map
       (kbd "RET") #'corfu-insert
-      [return] #'corfu-insert)))
+      [return] #'corfu-insert))
 
-;; Taken from corfu's README.
-;; TODO: extend this to other completion front-ends, mainly helm and ido, since
-;; ivy is being considered for removal.
-(when (modulep! :completion vertico)
-  (defun corfu-move-to-minibuffer ()
-    (interactive)
-    (let ((completion-extra-properties corfu--extra)
-          completion-cycle-threshold completion-cycling)
-      (apply #'consult-completion-in-region completion-in-region--data))))
+  (after! vertico
+    ;; Taken from corfu's README.
+    ;; TODO: extend this to other completion front-ends.
+    (defun corfu-move-to-minibuffer ()
+      (interactive)
+      (let ((completion-extra-properties corfu--extra)
+            (completion-cycle-threshold completion-cycling))
+        (apply #'consult-completion-in-region completion-in-region--data)))
+    (map! :map 'corfu-map
+          :desc "move to minibuffer" "s-<down>" #'corfu-move-to-minibuffer
+          (:when (modulep! :editor evil)
+            :desc "move to minibuffer" "s-j" #'corfu-move-to-minibuffer))))
 
 (use-package! cape
   :after corfu
   :init
   (add-to-list 'completion-at-point-functions #'cape-file)
   :config
-  (when (and (modulep! :tools lsp) (not (modulep! :tools lsp +eglot)))
-    (advice-add #'lsp-completion-at-point :around #'cape-wrap-nonexclusive))
   (when (modulep! :editor snippets)
     (load! "+yas-capf.el")
     (add-hook 'yas-minor-mode-hook
               (lambda ()
-                (push #'yas-capf completion-at-point-functions)))))
+                (add-to-list 'completion-at-point-functions #'yas-capf)))))
 
 (use-package! kind-icon
-  :when (modulep! +icons)
   :commands kind-icon-margin-formatter
   :init
   (add-hook 'corfu-margin-formatters #'kind-icon-margin-formatter)
@@ -113,11 +103,8 @@ Note that changes are applied only after a cache reset, via
   (plist-put svg-lib-style-default :height +corfu-icon-height))
 
 (use-package! corfu-terminal
-  :when (and (modulep! :os tty) (not (display-graphic-p)))
+  :when (not (display-graphic-p))
   :hook (corfu-mode . corfu-terminal-mode))
-
-(setq read-extended-command-predicate
-      #'command-completion-default-include-p)
 
 ;;
 ;;; Extensions
