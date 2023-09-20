@@ -128,6 +128,19 @@ A few variables may be set to change behavior of this module:
 - [[var:+corfu-icon-mapping]] ::
   Configures icons used for each completion. See its documentation for details.
 
+** Adding CAPFs to a mode
+To add other CAPFs on a mode-per-mode basis, put either of the following in your
+~config.el~:
+
+#+begin_src emacs-lisp
+(add-hook! some-mode (add-to-list 'completion-at-point-functions #'some-capf))
+;; OR, but note the different call signature
+(add-hook 'some-mode-hook (lambda () (add-to-list 'completion-at-point-functions #'some-capf)))
+#+end_src
+
+Also see ~add-hook!~'s documentation for additional ways to call it.
+~add-hook~ only accepts the quoted arguments form above.
+
 * Troubleshooting
 [[doom-report:][Report an issue?]]
 
