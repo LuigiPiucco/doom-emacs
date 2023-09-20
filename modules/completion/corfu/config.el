@@ -153,14 +153,11 @@ Meant as :around advice for `corfu--recompute'."
     (map! :map 'corfu-map "s-<down>" #'corfu-move-to-minibuffer
           (:when (modulep! :editor evil) "s-j" #'corfu-move-to-minibuffer))))
 
-(defmacro +corfu--add-capf! (capf)
-  "Create sexp to add CAPF to the list of CAPFs."
-  `(add-to-list 'completion-at-point-functions ,capf))
 (use-package! cape
   :after corfu
   :config
-  (add-hook! prog-mode (+corfu--add-capf! #'cape-file))
-  (add-hook! (org-mode markdown-mode) (+corfu--add-capf! #'cape-elisp-block))
+  (add-hook! prog-mode (add-to-list 'completion-at-point-functions #'cape-file))
+  (add-hook! (org-mode markdown-mode) (add-to-list 'completion-at-point-functions #'cape-elisp-block))
   (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible))
 
 (use-package! yasnippet-capf
