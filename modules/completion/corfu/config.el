@@ -172,13 +172,14 @@ Meant as :around advice for `corfu--recompute'."
   :when (not (display-graphic-p))
   :hook (corfu-mode . corfu-terminal-mode))
 
-;;
 ;;; Extensions
+
 (use-package! corfu-history
-  :after savehist
   :hook (corfu-mode . corfu-history-mode)
   :config
-  (add-to-list 'savehist-additional-variables 'corfu-history))
+  (after! savehist (add-to-list 'savehist-additional-variables 'corfu-history)))
+
+
 (use-package! corfu-popupinfo
   :hook (corfu-mode . corfu-popupinfo-mode)
   :config
