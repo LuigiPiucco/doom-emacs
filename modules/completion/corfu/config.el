@@ -61,7 +61,7 @@ must be present.")
   :hook (org-mode . corfu-mode)
   :init
   ;; Auto-completion settings, must be set before calling `global-corfu-mode'.
-  ;; Due to lazy-loading, setting them in config.el works too.
+  ;; Due to lazy-loading, overriding these in config.el works too.
   (setq corfu-auto t
         corfu-auto-delay 0.1
         corfu-auto-prefix 2
@@ -154,17 +154,19 @@ Meant as :around advice for `corfu--recompute'."
           (:when (modulep! :editor evil) "s-j" #'corfu-move-to-minibuffer))))
 
 (use-package! cape
-  :after corfu
-  :config
+  :defer t
+  :init
   (add-hook! prog-mode (add-to-list 'completion-at-point-functions #'cape-file))
   (add-hook! (org-mode markdown-mode) (add-to-list 'completion-at-point-functions #'cape-elisp-block))
   (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible))
 
 (use-package! yasnippet-capf
-  :after corfu
-  :config
-  (add-hook 'yas-minor-mode-hook
-            (lambda () (add-to-list 'completion-at-point-functions #'yasnippet-capf))))
+  :when (modulep! :editor snippets)
+  :defer t
+  :init
+  (after! yasnippet
+    (add-hook! yas-minor-mode
+      (add-to-list 'completion-at-point-functions #'yasnippet-capf))))
 
 (use-package! corfu-terminal
   :when (not (display-graphic-p))
