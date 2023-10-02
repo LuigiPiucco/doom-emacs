@@ -150,8 +150,8 @@ Meant as :around advice for `corfu--recompute'."
       (let ((completion-extra-properties corfu--extra)
             (completion-cycle-threshold completion-cycling))
         (apply #'consult-completion-in-region completion-in-region--data)))
-    (map! :map 'corfu-map "s-<down>" #'corfu-move-to-minibuffer
-          (:when (modulep! :editor evil) "s-j" #'corfu-move-to-minibuffer))))
+    (map! :map 'corfu-map "M-m" #'corfu-move-to-minibuffer
+          (:when (modulep! :editor evil) :i "M-j" #'corfu-move-to-minibuffer))))
 
 (use-package! cape
   :defer t
