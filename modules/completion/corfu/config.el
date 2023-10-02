@@ -85,12 +85,15 @@ must be present.")
         tab-always-indent (if (modulep! +tng) 'complete tab-always-indent))
 
   (when (modulep! +orderless)
-    (after! 'lsp-mode
+    (after! lsp-mode
       (add-to-list 'completion-category-overrides
                    `(lsp-capf (styles ,@+corfu-completion-styles ,(when (modulep! +orderless) 'orderless)))))
-    (after! 'eglot
+    (after! eglot
       (add-to-list 'completion-category-overrides
                    `(eglot (styles ,@+corfu-completion-styles ,(when (modulep! +orderless) 'orderless))))))
+
+  (after! evil
+    (add-hook 'evil-insert-state-exit-hook #'corfu-quit))
 
   ;; For the icons, we use a custom margin formatter, which simply reads the
   ;; mapping in `+corfu-icon-mapping'.
