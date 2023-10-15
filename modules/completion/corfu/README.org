@@ -31,6 +31,7 @@ highly non-native, but has some extra features and more maturity.
 - [[doom-package:corfu]]
 - [[doom-package:cape]]
 - [[doom-package:nerd-icons-completion]] if [[doom-module::completion corfu +icons]]
+- [[doom-package:nerd-icons-corfu]] if [[doom-module::completion corfu +icons]]
 - [[doom-package:orderless]] if [[doom-module::completion corfu +orderless]]
 - [[doom-package:corfu-terminal]] if [[doom-module::os tty]]
 - [[doom-package:yasnippet-capf]] if [[doom-module::editor snippets]]
@@ -125,8 +126,6 @@ A few variables may be set to change behavior of this module:
 - [[var:+corfu-completion-styles]] ::
   Used to override [[var:completion-styles]] for corfu invocations, such that it
   can have a value separate from, say, [[doom-package:consult]].
-- [[var:+corfu-icon-mapping]] ::
-  Configures icons used for each completion. See its documentation for details.
 
 ** Adding CAPFs to a mode
 To add other CAPFs on a mode-per-mode basis, put either of the following in your
