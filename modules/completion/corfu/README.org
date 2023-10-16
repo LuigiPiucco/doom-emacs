@@ -96,8 +96,8 @@ additional binds:
 | [[kbd:][S-TAB]]   | (when completing) Go to previous candidate |
 
 ** Searching with multiple keywords
-If the [[doom-module::completion corfu +orderless]] flag is enabled, users can
-perform code completion with multiple search keywords by use of space as
+If the [[doom-module::completion corfu +orderless]] flag is enabled, users can perform code
+completion with multiple search keywords by use of space or comma as the
 separator. More information can be found [[https://github.com/oantolin/orderless#company][here]]. Pressing [[kdb:][C-SPC]] again while
 completing inserts a space as separator. This allows searching with
 space-separated terms; each piece will match individually and in any order, with
@@ -123,9 +123,8 @@ A few variables may be set to change behavior of this module:
   Configures behavior for exact matches. Its default is nil, and it's
   recommended to leave it at that. Otherwise, single matches on snippet keys
   expand immediately.
-- [[var:+corfu-completion-styles]] ::
-  Used to override [[var:completion-styles]] for corfu invocations, such that it
-  can have a value separate from, say, [[doom-package:consult]].
+- [[var:+orderless-wildcard-character]] ::
+  Used for fuzzy-matching corfu invocations as an escapable alternative to ~corfu-separator~.
 
 ** Adding CAPFs to a mode
 To add other CAPFs on a mode-per-mode basis, put either of the following in your

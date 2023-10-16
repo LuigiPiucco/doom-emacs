@@ -1,13 +1,14 @@
 ;;; completion/corfu/config.el -*- lexical-binding: t; -*-
 
-(defvar +corfu-completion-styles '(basic partial-completion flex)
-  "Completion styles for corfu to use.
-
-If the user enables +orderless, `orderless' is automatically appended to this
-list before fowarding to `completion-styles'.")
-
 (defvar +cape-buffer-scanning-size-limit (* 1 1024 1024) ; 1 MB
   "Size limit for a buffer to be scanned by `cape-line' or `cape-dabbrev'.")
+
+(defvar +orderless-wildcard-character ?,
+  "A character used as a wildcard in Corfu for fuzzy autocompletion. If you
+want to match the wildcard literally in completion, you can
+escape it with forward slash.
+
+This variable needs to be set at the top-level before any `after!' blocks.")
 
 ;;
 ;;; Packages
@@ -29,7 +30,6 @@ list before fowarding to `completion-styles'.")
          :i "C-SPC" #'completion-at-point))
   :config
   (setq corfu-cycle t
-        corfu-separator (when (modulep! +orderless) ?\s)
         corfu-preselect (if (modulep! :completion corfu +tng) 'prompt t)
         corfu-count 16
         corfu-max-width 120
@@ -76,34 +76,52 @@ typical of shells and the full autocompletion of Corfu."
   (add-to-list 'corfu-auto-commands #'lispy-colon)
 
   (when (modulep! +orderless)
-    (after! lsp-mode
-      (add-to-list 'completion-category-overrides
-                   `(lsp-capf (styles ,@+corfu-completion-styles ,(when (modulep! +orderless) 'orderless)))))
-    (after! eglot
-      (add-to-list 'completion-category-overrides
-                   `(eglot (styles ,@+corfu-completion-styles ,(when (modulep! +orderless) 'orderless))))))
+    (defmacro +orderless-escapable-split-fn (char)
+      (let ((char-string (string (if (symbolp char) (symbol-value char) char))))
+        `(defun +orderless-escapable-split-on-space-or-char (s)
+           (mapcar
+            (lambda (piece)
+              (replace-regexp-in-string
+               (string 1) ,char-string
+               (replace-regexp-in-string
+                (concat (string 0) "\\|" (string 1))
+                (lambda (x)
+                  (pcase x
+                    ("\0" " ")
+                    ("\1" ,char-string)
+                    (_ x)))
+                piece
+                ;; These are arguments to `replace-regexp-in-string'.
+                'fixedcase 'literal)
+               'fixedcase 'literal))
+            (split-string (replace-regexp-in-string
+                           (concat "\\\\\\\\\\|\\\\ \\|\\\\"
+                                   ,char-string)
+                           (lambda (x)
+                             (pcase x
+                               ("\\ " "\0")
+                               (,(concat "\\" char-string)
+                                "\1")
+                               (_ x)))
+                           s 'fixedcase 'literal)
+                          ,(concat "[ " char-string "]+")
+                          ;; If we want some fancy logic in the future for
+                          ;; ",PREFIX", we will have to keep nulls but for now,
+                          ;; remove them.
+                          t)))))
+    (after! orderless
+      ;; Orderless splits the string into components and then determines the
+      ;; matching style for each component. This is all regexp stuff.
+      (setq orderless-component-separator
+            (+orderless-escapable-split-fn +orderless-wildcard-character))
+      (setq corfu-separator +orderless-wildcard-character)
+      (keymap-set corfu-map (char-to-string +orderless-wildcard-character)
+                  #'corfu-insert-separator)))
 
-  (after! evil
-    (add-hook 'evil-insert-state-exit-hook #'corfu-quit))
+  (add-hook 'evil-insert-state-exit-hook #'corfu-quit)
 
   (when (modulep! +icons)
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-
-  ;; This is to decouple the use of `completion-styles' in corfu from other
-  ;; completion packages, such as vertico. That way, the user can leave the
-  ;; global value of the variable alone, say, to be used by the default
-  ;; front-end or consult. The vertico module also does something similar with
-  ;; `+vertico-company-completion-styles'.
-  (defadvice! +corfu--completion-styles (orig &rest args)
-    "Try default completion styles before orderless.
-
-Meant as :around advice for `corfu--recompute'."
-    :around #'corfu--recompute
-    (let ((completion-styles
-           (append +corfu-completion-styles (when (modulep! +orderless)
-                                              '(orderless))))
-          completion-category-overrides completion-category-defaults)
-      (apply orig args)))
 
   (map! (:map 'corfu-map
          (:when (modulep! +orderless)
