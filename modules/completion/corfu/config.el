@@ -25,6 +25,8 @@ list before fowarding to `completion-styles'.")
                                help-mode
                                gud-mode
                                vterm-mode))
+  (map! (:unless (modulep! +tng)
+         :i "C-SPC" #'completion-at-point))
   :config
   (setq corfu-cycle t
         corfu-separator (when (modulep! +orderless) ?\s)
@@ -72,16 +74,14 @@ Meant as :around advice for `corfu--recompute'."
           completion-category-overrides completion-category-defaults)
       (apply orig args)))
 
-  (map! (:unless (modulep! +tng)
-          "C-SPC" #'completion-at-point)
-        (:map 'corfu-map
-              (:when (modulep! +orderless)
-                "C-SPC" #'corfu-insert-separator)
-              (:when (modulep! +tng)
-                [tab] #'corfu-next
-                [backtab] #'corfu-previous
-                "TAB" #'corfu-next
-                "S-TAB" #'corfu-previous)))
+  (map! (:map 'corfu-map
+         (:when (modulep! +orderless)
+          "C-SPC" #'corfu-insert-separator)
+         (:when (modulep! +tng)
+          [tab] #'corfu-next
+          [backtab] #'corfu-previous
+          "TAB" #'corfu-next
+          "S-TAB" #'corfu-previous)))
   (after! evil-collection-corfu
     (evil-collection-define-key 'insert 'corfu-map
       (kbd "RET") #'corfu-insert
