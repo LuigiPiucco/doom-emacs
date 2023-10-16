@@ -192,10 +192,10 @@ typical of shells and the full autocompletion of Corfu."
   (add-hook! 'minibuffer-setup-hook
     (add-hook 'completion-at-point-functions #'cape-dabbrev 91 t))
 
-  ;; Sometimes in the minibuffer we have acces to additional completions, like
-  ;; in `read-shell-command'. We want to be able use `cape-dabbrev' as a
-  ;; fallback in these situations as well.
+  ;; Make these capfs composable.
   (advice-add #'comint-completion-at-point :around #'cape-wrap-nonexclusive)
+  (advice-add #'eglot-completion-at-point :around #'cape-wrap-nonexclusive)
+  (advice-add #'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
 
   (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible))
 
