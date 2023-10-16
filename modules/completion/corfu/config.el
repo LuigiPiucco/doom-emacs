@@ -144,8 +144,10 @@ typical of shells and the full autocompletion of Corfu."
       (let ((completion-extra-properties corfu--extra)
             (completion-cycle-threshold completion-cycling))
         (apply #'consult-completion-in-region completion-in-region--data)))
-    (map! :map 'corfu-map "M-m" #'corfu-move-to-minibuffer
-          (:when (modulep! :editor evil) :i "M-j" #'corfu-move-to-minibuffer))))
+    (map! :map 'corfu-map "M-m" #'corfu-move-to-minibuffer)
+    (after! evil-collection-corfu
+      (evil-collection-define-key 'insert 'corfu-map
+        (kbd "M-j") #'corfu-move-to-minibuffer))))
 
 (use-package! cape
   :defer t
