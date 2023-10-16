@@ -41,6 +41,37 @@ list before fowarding to `completion-styles'.")
         ;; However, it should otherwise behave like normal, whatever normal was.
         tab-always-indent (if (modulep! +tng) 'complete tab-always-indent))
 
+  (defun corfu-disable-in-minibuffer-p ()
+    (or (bound-and-true-p mct--active)
+        (bound-and-true-p vertico--input)
+        (and (featurep 'helm-core) (helm--alive-p))
+        (eq (current-local-map) read-passwd-map)))
+
+  (defun corfu-enable-in-minibuffer ()
+    "Enable Corfu in the minibuffer if `completion-at-point' is bound."
+    (unless (corfu-disable-in-minibuffer-p)
+      (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
+                  corfu-popupinfo-delay nil)
+      (corfu-mode 1)))
+
+  (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
+
+  (defadvice! +corfu--submit-candidate-to-shell-a (fn &rest args)
+    "Make `corfu' behave in `comint' as it does in the minibuffer.
+
+Do not allow `RET' for autocompletion in Comint & Eshell buffers.
+This provides a middle ground between the `TAB' only completion
+typical of shells and the full autocompletion of Corfu."
+    :around #'corfu-insert
+    (if (and (or (derived-mode-p 'eshell-mode)
+                 (derived-mode-p 'comint-mode))
+             corfu-auto)
+        (call-interactively
+         (keymap-lookup (symbol-value
+                         (intern (concat (symbol-name major-mode) "-map")))
+                        "RET"))
+      (apply fn args)))
+
   ;; Allow completion after `:' in Lispy.
   (add-to-list 'corfu-auto-commands #'lispy-colon)
 
