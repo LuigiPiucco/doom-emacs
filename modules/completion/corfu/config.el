@@ -28,7 +28,7 @@ list before fowarding to `completion-styles'.")
   :config
   (setq corfu-cycle t
         corfu-separator (when (modulep! +orderless) ?\s)
-        corfu-preselect t
+        corfu-preselect (if (modulep! :completion corfu +tng) 'prompt t)
         corfu-count 16
         corfu-max-width 120
         corfu-preview-current 'insert
