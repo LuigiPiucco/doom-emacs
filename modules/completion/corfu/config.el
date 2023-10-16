@@ -6,6 +6,9 @@
 If the user enables +orderless, `orderless' is automatically appended to this
 list before fowarding to `completion-styles'.")
 
+(defvar +cape-buffer-scanning-size-limit (* 1 1024 1024) ; 1 MB
+  "Size limit for a buffer to be scanned by `cape-line' or `cape-dabbrev'.")
+
 ;;
 ;;; Packages
 (use-package! corfu
@@ -35,6 +38,9 @@ list before fowarding to `completion-styles'.")
         ;; In the case of +tng, TAB should be smart regarding completion;
         ;; However, it should otherwise behave like normal, whatever normal was.
         tab-always-indent (if (modulep! +tng) 'complete tab-always-indent))
+
+  ;; Allow completion after `:' in Lispy.
+  (add-to-list 'corfu-auto-commands #'lispy-colon)
 
   (when (modulep! +orderless)
     (after! lsp-mode
@@ -95,17 +101,59 @@ Meant as :around advice for `corfu--recompute'."
 (use-package! cape
   :defer t
   :init
-  (add-hook! prog-mode (add-to-list 'completion-at-point-functions #'cape-file))
-  (add-hook! (org-mode markdown-mode) (add-to-list 'completion-at-point-functions #'cape-elisp-block))
+  ;; Set up `cape-dabbrev' and `cape-line' options.
+  (defun +cape-line-buffers ()
+    (cl-loop for buf in (buffer-list)
+             if (or (eq major-mode (buffer-local-value 'major-mode buf))
+                    (< (buffer-size buf) +cape-buffer-scanning-size-limit))
+             collect buf))
+  (defun +dabbrev-friend-buffer-p (other-buffer)
+    (< (buffer-size other-buffer +cape-buffer-scanning-size-limit)))
+  (setq cape-dabbrev-check-other-buffers t
+        cape-line-buffer-function #'+cape-line-buffers
+        dabbrev-friend-buffer-function #'+dabbrev-friend-buffer-p
+        dabbrev-upcase-means-case-search t)
+
+  (add-hook! prog-mode
+    (add-hook 'completion-at-point-functions #'cape-file -1 t))
+  (add-hook! (org-mode markdown-mode)
+    (add-hook 'completion-at-point-functions #'cape-elisp-block 0 t))
+
+  ;; Complete emojis :).
+  (when (> emacs-major-version 28)
+    (add-hook! (prog-mode conf-mode)
+      (add-hook 'completion-at-point-functions
+                (cape-capf-inside-comment
+                 (cape-capf-prefix-length #'cape-emoji 1))
+                90 t))
+    (add-hook! text-mode
+      (add-hook 'completion-at-point-functions (cape-capf-prefix-length #'cape-emoji 1) 90 t)))
+
+  ;; Enable Dabbrev completion basically everywhere as a fallback.
+  (add-hook! (text-mode conf-mode comint-mode)
+    (add-hook 'completion-at-point-functions #'cape-dabbrev 91 t))
+
+  ;; Enable dictionary-based autocompletion.
+  (add-hook! text-mode
+    (add-hook 'completion-at-point-functions #'cape-dict 93 t))
+
+  ;; Set the autocompletion backends to enable for the minibuffer.
+  (add-hook! 'minibuffer-setup-hook
+    (add-hook 'completion-at-point-functions #'cape-dabbrev 91 t))
+
+  ;; Sometimes in the minibuffer we have acces to additional completions, like
+  ;; in `read-shell-command'. We want to be able use `cape-dabbrev' as a
+  ;; fallback in these situations as well.
+  (advice-add #'comint-completion-at-point :around #'cape-wrap-nonexclusive)
+
   (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible))
 
 (use-package! yasnippet-capf
   :when (modulep! :editor snippets)
   :defer t
   :init
-  (after! yasnippet
-    (add-hook! yas-minor-mode
-      (add-to-list 'completion-at-point-functions #'yasnippet-capf))))
+  (add-hook! yas-minor-mode
+    (add-hook 'completion-at-point-functions #'yasnippet-capf 92 t)))
 
 (use-package! corfu-terminal
   :when (not (display-graphic-p))

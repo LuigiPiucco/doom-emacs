@@ -132,13 +132,14 @@ To add other CAPFs on a mode-per-mode basis, put either of the following in your
 ~config.el~:
 
 #+begin_src emacs-lisp
-(add-hook! some-mode (add-to-list 'completion-at-point-functions #'some-capf))
+(add-hook! some-mode (add-hook 'completion-at-point-functions #'some-capf depth t))
 ;; OR, but note the different call signature
-(add-hook 'some-mode-hook (lambda () (add-to-list 'completion-at-point-functions #'some-capf)))
+(add-hook 'some-mode-hook (lambda () (add-hook 'completion-at-point-functions #'some-capf depth t)))
 #+end_src
 
-Also see ~add-hook!~'s documentation for additional ways to call it.
-~add-hook~ only accepts the quoted arguments form above.
+DEPTH above is an integer between -100, 100, and defaults to 0 of ommited. Also
+see ~add-hook!~'s documentation for additional ways to call it. ~add-hook~ only
+accepts the quoted arguments form above.
 
 * Troubleshooting
 [[doom-report:][Report an issue?]]
