@@ -6,7 +6,7 @@
 (defvar +orderless-wildcard-character ?,
   "A character used as a wildcard in Corfu for fuzzy autocompletion. If you
 want to match the wildcard literally in completion, you can
-escape it with forward slash.
+escape it with forward slash. Do NOT set this to SPC.
 
 This variable needs to be set at the top-level before any `after!' blocks.")
 
