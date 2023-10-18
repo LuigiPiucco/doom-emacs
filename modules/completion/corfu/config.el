@@ -206,7 +206,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
         dabbrev-upcase-means-case-search t)
 
   (add-hook! prog-mode
-    (add-hook 'completion-at-point-functions #'cape-file -1 t))
+    (add-hook 'completion-at-point-functions #'cape-file -10 t))
   (add-hook! (org-mode markdown-mode)
     (add-hook 'completion-at-point-functions #'cape-elisp-block 0 t))
 
@@ -216,21 +216,21 @@ This variable needs to be set at the top-level before any `after!' blocks.")
       (add-hook 'completion-at-point-functions
                 (cape-capf-inside-comment
                  (cape-capf-prefix-length #'cape-emoji 1))
-                90 t))
+                10 t))
     (add-hook! text-mode
-      (add-hook 'completion-at-point-functions (cape-capf-prefix-length #'cape-emoji 1) 90 t)))
+      (add-hook 'completion-at-point-functions (cape-capf-prefix-length #'cape-emoji 1) 10 t)))
 
   ;; Enable Dabbrev completion basically everywhere as a fallback.
   (add-hook! (text-mode conf-mode comint-mode)
-    (add-hook 'completion-at-point-functions #'cape-dabbrev 91 t))
+    (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t))
 
   ;; Enable dictionary-based autocompletion.
   (add-hook! text-mode
-    (add-hook 'completion-at-point-functions #'cape-dict 93 t))
+    (add-hook 'completion-at-point-functions #'cape-dict 40 t))
 
   ;; Set the autocompletion backends to enable for the minibuffer.
   (add-hook! 'minibuffer-setup-hook
-    (add-hook 'completion-at-point-functions #'cape-dabbrev 91 t))
+    (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t))
 
   ;; Make these capfs composable.
   (advice-add #'comint-completion-at-point :around #'cape-wrap-nonexclusive)
@@ -244,7 +244,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   :defer t
   :init
   (add-hook! yas-minor-mode
-    (add-hook 'completion-at-point-functions #'yasnippet-capf 92 t)))
+    (add-hook 'completion-at-point-functions #'yasnippet-capf 30 t)))
 
 (use-package! corfu-terminal
   :when (not (display-graphic-p))
