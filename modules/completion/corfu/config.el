@@ -56,25 +56,45 @@ This variable needs to be set at the top-level before any `after!' blocks.")
 
   (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
 
-  (defadvice! +corfu--submit-candidate-to-shell-a (fn &rest args)
-    "Make `corfu' behave in `comint' as it does in the minibuffer.
+  (defun corfu-visible-p ()
+    (or (and (frame-live-p corfu--frame)
+             (frame-visible-p corfu--frame))
+        (and (featurep 'corfu-terminal)
+             (popon-live-p corfu-terminal--popon))))
 
-Do not allow `RET' for autocompletion in Comint & Eshell buffers.
-This provides a middle ground between the `TAB' only completion
-typical of shells and the full autocompletion of Corfu."
-    :around #'corfu-insert
-    (if (and (or (derived-mode-p 'eshell-mode)
-                 (derived-mode-p 'comint-mode))
-             corfu-auto)
-        (call-interactively
-         (keymap-lookup
-          (thread-last (current-active-maps t)
-                       (delq corfu-map)
-                       (delq (and (featurep 'evil)
-                                    (evil-get-auxiliary-keymap corfu-map
-                                                               evil-state))))
-          "RET"))
-      (apply fn args)))
+  ;; If you want to update the visual hints after completing minibuffer commands
+  ;; with Corfu and exiting, you have to do it manually.
+  (defadvice! +corfu--insert-before-exit-minibuffer-a ()
+    :before #'exit-minibuffer
+    (when (corfu-visible-p)
+      (when (member isearch-lazy-highlight-timer timer-idle-list)
+        (apply (timer--function isearch-lazy-highlight-timer)
+               (timer--args isearch-lazy-highlight-timer)))
+      (when (member (bound-and-true-p anzu--update-timer) timer-idle-list)
+        ;; Pending a PR I am making to expose `anzu--update-timer'.
+        (apply (timer--function anzu--update-timer)
+               (timer--args anzu--update-timer)))
+      (when (member (bound-and-true-p evil--ex-search-update-timer)
+                    timer-idle-list)
+        (apply (timer--function evil--ex-search-update-timer)
+               (timer--args evil--ex-search-update-timer)))))
+
+  (defadvice! +corfu--submit-candidate-to-shell-a ()
+    "Do not make us type RET twice in `eshell' nor `comint' buffers."
+    :after #'corfu-insert
+    (when (and (or (derived-mode-p 'eshell-mode)
+                   (derived-mode-p 'comint-mode))
+               (member (this-command-keys-vector)
+                       (list (vector 'return) (vector ?\r)))
+               (eq (point) (point-max)))
+      (call-interactively
+       (keymap-lookup
+        (thread-last (current-active-maps t)
+                     (delq corfu-map)
+                     (delq (and (featurep 'evil)
+                                (evil-get-auxiliary-keymap corfu-map
+                                                           evil-state))))
+        "RET"))))
 
   ;; Allow completion after `:' in Lispy.
   (add-to-list 'corfu-auto-commands #'lispy-colon)
@@ -104,7 +124,7 @@ typical of shells and the full autocompletion of Corfu."
                                 (pcase x
                                   ("\\ " "\0")
                                   (,(concat "\\" char-string)
-                                      "\1")
+                                   "\1")
                                   (_ x)))
                               s 'fixedcase 'literal)
                              ,(concat "[ " char-string "]+")
@@ -129,8 +149,8 @@ typical of shells and the full autocompletion of Corfu."
                             (current-active-maps t)
                             (delq corfu-map)
                             (delq (and (featurep 'evil)
-                                         (evil-get-auxiliary-keymap corfu-map
-                                                                    evil-state))))
+                                       (evil-get-auxiliary-keymap corfu-map
+                                                                  evil-state))))
                           "SPC"))))))
 
   (add-hook 'evil-insert-state-exit-hook #'corfu-quit)
