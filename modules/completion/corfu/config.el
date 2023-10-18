@@ -115,20 +115,25 @@ This variable needs to be set at the top-level before any `after!' blocks.")
                     ("\0" " ")
                     ("\1" ,char-string)
                     (_ x)))
-                piece 'fixedcase 'literal)
-
-               (split-string (replace-regexp-in-string
-                              (concat "\\\\\\\\\\|\\\\ \\|\\\\"
-                                      ,char-string)
-                              (lambda (x)
-                                (pcase x
-                                  ("\\ " "\0")
-                                  (,(concat "\\" char-string)
-                                   "\1")
-                                  (_ x)))
-                              s 'fixedcase 'literal)
-                             ,(concat "[ " char-string "]+")
-                             t)))))))
+                piece
+                ;; These are arguments to `replace-regexp-in-string'.
+                'fixedcase 'literal)
+               'fixedcase 'literal))
+            (split-string (replace-regexp-in-string
+                           (concat "\\\\\\\\\\|\\\\ \\|\\\\"
+                                   ,char-string)
+                           (lambda (x)
+                             (pcase x
+                               ("\\ " "\0")
+                               (,(concat "\\" char-string)
+                                "\1")
+                               (_ x)))
+                           s 'fixedcase 'literal)
+                          ,(concat "[ " char-string "]+")
+                          ;; If we want some fancy logic in the future for
+                          ;; ",PREFIX", we will have to keep nulls but for now,
+                          ;; remove them.
+                          t)))))
     (after! orderless
       ;; Orderless splits the string into components and then determines the
       ;; matching style for each component. This is all regexp stuff.
