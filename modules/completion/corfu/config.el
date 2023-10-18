@@ -67,15 +67,20 @@ typical of shells and the full autocompletion of Corfu."
                  (derived-mode-p 'comint-mode))
              corfu-auto)
         (call-interactively
-         (keymap-lookup (symbol-value
-                         (intern (concat (symbol-name major-mode) "-map")))
-                        "RET"))
+         (keymap-lookup
+          (thread-last (current-active-maps t)
+                       (delq corfu-map)
+                       (delq (and (featurep 'evil)
+                                    (evil-get-auxiliary-keymap corfu-map
+                                                               evil-state))))
+          "RET"))
       (apply fn args)))
 
   ;; Allow completion after `:' in Lispy.
   (add-to-list 'corfu-auto-commands #'lispy-colon)
 
-  (when (modulep! +orderless)
+  (when (and (modulep! +orderless)
+             +orderless-wildcard-character)
     (defmacro +orderless-escapable-split-fn (char)
       (let ((char-string (string (if (symbolp char) (symbol-value char) char))))
         `(defun +orderless-escapable-split-on-space-or-char (s)
@@ -90,25 +95,20 @@ typical of shells and the full autocompletion of Corfu."
                     ("\0" " ")
                     ("\1" ,char-string)
                     (_ x)))
-                piece
-                ;; These are arguments to `replace-regexp-in-string'.
-                'fixedcase 'literal)
-               'fixedcase 'literal))
-            (split-string (replace-regexp-in-string
-                           (concat "\\\\\\\\\\|\\\\ \\|\\\\"
-                                   ,char-string)
-                           (lambda (x)
-                             (pcase x
-                               ("\\ " "\0")
-                               (,(concat "\\" char-string)
-                                "\1")
-                               (_ x)))
-                           s 'fixedcase 'literal)
-                          ,(concat "[ " char-string "]+")
-                          ;; If we want some fancy logic in the future for
-                          ;; ",PREFIX", we will have to keep nulls but for now,
-                          ;; remove them.
-                          t)))))
+                piece 'fixedcase 'literal)
+
+               (split-string (replace-regexp-in-string
+                              (concat "\\\\\\\\\\|\\\\ \\|\\\\"
+                                      ,char-string)
+                              (lambda (x)
+                                (pcase x
+                                  ("\\ " "\0")
+                                  (,(concat "\\" char-string)
+                                      "\1")
+                                  (_ x)))
+                              s 'fixedcase 'literal)
+                             ,(concat "[ " char-string "]+")
+                             t)))))))
     (after! orderless
       ;; Orderless splits the string into components and then determines the
       ;; matching style for each component. This is all regexp stuff.
@@ -116,7 +116,22 @@ typical of shells and the full autocompletion of Corfu."
             (+orderless-escapable-split-fn +orderless-wildcard-character))
       (setq corfu-separator +orderless-wildcard-character)
       (keymap-set corfu-map (char-to-string +orderless-wildcard-character)
-                  #'corfu-insert-separator)))
+                  #'corfu-insert-separator)
+      ;; Quit completion after typing the wildcard followed by a space.
+      (keymap-set corfu-map "SPC"
+                  (cmd! ()
+                        (when (and (> (point) (point-min))
+                                   (eq (char-before) +orderless-wildcard-character))
+                          (corfu-quit))
+                        (call-interactively
+                         (keymap-lookup
+                          (thread-last
+                            (current-active-maps t)
+                            (delq corfu-map)
+                            (delq (and (featurep 'evil)
+                                         (evil-get-auxiliary-keymap corfu-map
+                                                                    evil-state))))
+                          "SPC"))))))
 
   (add-hook 'evil-insert-state-exit-hook #'corfu-quit)
 
