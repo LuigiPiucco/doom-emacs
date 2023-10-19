@@ -157,7 +157,14 @@ This variable needs to be set at the top-level before any `after!' blocks.")
                                                                   evil-state))))
                           "SPC"))))))
 
-  (add-hook 'evil-insert-state-exit-hook #'corfu-quit)
+  (add-hook! 'evil-insert-state-exit-hook
+    (defun +corfu-quit-on-evil-insert-state-exit-h ()
+      ;; This is a workaround for unexpected calls to `corfu-quit' in
+      ;; :company-doc-buffer buffers. This was specifically happening when using
+      ;; `yasnippet-capf' and `company-yasnippet'.
+      (when (eq (current-buffer) (window-buffer (selected-window)))
+        (corfu-quit))))
+
 
   (when (modulep! +icons)
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
