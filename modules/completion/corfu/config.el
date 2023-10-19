@@ -82,11 +82,10 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   (defadvice! +corfu--submit-candidate-to-shell-a ()
     "Do not make us type RET twice in `eshell' nor `comint' buffers."
     :after #'corfu-insert
-    (when (and (or (derived-mode-p 'eshell-mode)
-                   (derived-mode-p 'comint-mode))
+    (when (and (derived-mode-p 'eshell-mode 'comint-mode)
                (member (this-command-keys-vector)
                        (list (vector 'return) (vector ?\r)))
-               (eq (point) (point-max)))
+               (eq (point) (point-at-eol)))
       (call-interactively
        (keymap-lookup
         (thread-last (current-active-maps t)
