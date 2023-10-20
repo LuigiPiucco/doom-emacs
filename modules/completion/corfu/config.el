@@ -200,8 +200,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   (setq cape-dabbrev-check-other-buffers t
         cape-line-buffer-function #'+cape-line-buffers
         dabbrev-friend-buffer-function #'+dabbrev-friend-buffer-p
-        dabbrev-upcase-means-case-search t
-        dabbrev-case-fold-search nil)   ; Reduce garbage `cape-dabbrev' results.
+        dabbrev-upcase-means-case-search t)
 
   (add-hook! prog-mode
     (add-hook 'completion-at-point-functions #'cape-file -10 t))
