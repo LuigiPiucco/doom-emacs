@@ -229,25 +229,9 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   (add-hook! (prog-mode text-mode conf-mode comint-mode minibuffer-setup)
     (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t))
 
-  (defun doom-point-in-docstring-or-comment-p ()
-    "Check if the point is in a docstring or comment."
-    (let ((faces (get-text-property (point) 'face)))
-      (pcase faces
-        ((or 'tree-sitter-hl-face:doc 'font-lock-doc-face) t)
-        ((pred listp) (or (memq 'tree-sitter-hl-face:doc faces)
-                          (memq 'font-lock-doc-face faces)))
-        (_ (doom-point-in-comment-p)))))
-
-  (defun cape-wrap-inside-docstring-or-comment (capf)
-    (and (doom-point-in-docstring-or-comment-p) (funcall capf)))
-
-  (after! cape
-    (cape--capf-wrapper inside-docstring-or-comment))
-
   ;; Complete emojis :).
   (when (> emacs-major-version 28)
     (add-hook! (prog-mode conf-mode)
-      (require 'cape)
       (add-hook 'completion-at-point-functions
                 (cape-capf-inside-docstring-or-comment
                  (cape-capf-prefix-length #'cape-emoji 1))
@@ -260,7 +244,6 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   (add-hook! text-mode
     (add-hook 'completion-at-point-functions #'cape-dict 40 t))
   (add-hook! (prog-mode conf-mode)
-    (require 'cape)
     (add-hook 'completion-at-point-functions
               (cape-capf-inside-docstring-or-comment #'cape-dict)
               40 t))
