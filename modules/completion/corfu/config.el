@@ -79,21 +79,25 @@ This variable needs to be set at the top-level before any `after!' blocks.")
         (apply (timer--function evil--ex-search-update-timer)
                (timer--args evil--ex-search-update-timer)))))
 
-  (defadvice! +corfu--submit-candidate-to-shell-a ()
+  (defadvice! +corfu--submit-candidate-to-shell-a (oldfun &rest args)
     "Do not make us type RET twice in `eshell' nor `comint' buffers."
-    :after #'corfu-insert
-    (when (and (derived-mode-p 'eshell-mode 'comint-mode)
-               (member (this-command-keys-vector)
-                       (list (vector 'return) (vector ?\r)))
-               (eq (point) (point-at-eol)))
-      (call-interactively
-       (keymap-lookup
-        (thread-last (current-active-maps t)
-                     (delq corfu-map)
-                     (delq (and (featurep 'evil)
-                                (evil-get-auxiliary-keymap corfu-map
-                                                           evil-state))))
-        "RET"))))
+    :around #'corfu-insert
+    (let ((index corfu--index))
+      (apply oldfun args)
+      (when (and (derived-mode-p 'eshell-mode 'comint-mode)
+                 (member (this-command-keys-vector)
+                         (list (vector 'return) (vector ?\r)))
+                 (eq (point) (point-at-eol))
+                 ;; Only do this if we did not select a completion.
+                 (eq index -1))
+        (call-interactively
+         (keymap-lookup
+          (thread-last (current-active-maps t)
+                       (delq corfu-map)
+                       (delq (and (featurep 'evil)
+                                  (evil-get-auxiliary-keymap corfu-map
+                                                             evil-state))))
+          "RET")))))
 
   ;; Allow completion after `:' in Lispy.
   (add-to-list 'corfu-auto-commands #'lispy-colon)
