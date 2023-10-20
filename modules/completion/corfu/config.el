@@ -79,13 +79,12 @@ This variable needs to be set at the top-level before any `after!' blocks.")
         (apply (timer--function evil--ex-search-update-timer)
                (timer--args evil--ex-search-update-timer)))))
 
-  (defadvice! +corfu--submit-candidate-to-shell-a (oldfun &rest args)
-    "Do not make us type RET twice in `eshell' nor `comint' buffers."
+  (defadvice! +corfu--return-insert-a (oldfun &rest args)
+    "Do not make us type RET twice with Corfu."
     :around #'corfu-insert
     (let ((index corfu--index))
       (apply oldfun args)
-      (when (and (derived-mode-p 'eshell-mode 'comint-mode)
-                 (member (this-command-keys-vector)
+      (when (and (member (this-command-keys-vector)
                          (list (vector 'return) (vector ?\r)))
                  (eq (point) (point-at-eol))
                  ;; Only do this if we did not select a completion.
