@@ -155,7 +155,15 @@ This variable needs to be set at the top-level before any `after!' blocks.")
                             (delq (and (featurep 'evil)
                                        (evil-get-auxiliary-keymap corfu-map
                                                                   evil-state))))
-                          "SPC"))))))
+                          "SPC"))))
+
+      ;; Require that for Corfu, candidates begin with the first component of
+      ;; the prefix. I added this because it was jarring to use `cape-dict' but
+      ;; see many words that did not begin with the prefix.
+      (add-hook! 'orderless-style-dispatchers
+        (defun +corfu-orderless-dispatch (pattern index total)
+          (when (and completion-in-region--data (eq index 0))
+            (cons 'orderless-regexp (concat "^" (regexp-quote pattern))))))))
 
   (add-hook! 'evil-insert-state-exit-hook
     (defun +corfu-quit-on-evil-insert-state-exit-h ()
