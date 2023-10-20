@@ -226,11 +226,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
     (add-hook 'completion-at-point-functions #'cape-elisp-block 0 t))
 
   ;; Enable Dabbrev completion basically everywhere as a fallback.
-  (add-hook! (prog-mode text-mode conf-mode comint-mode)
-    (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t))
-
-  ;; Set the autocompletion backends to enable for the minibuffer.
-  (add-hook! 'minibuffer-setup-hook
+  (add-hook! (prog-mode text-mode conf-mode comint-mode minibuffer-setup)
     (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t))
 
   (defun doom-point-in-docstring-or-comment-p ()
@@ -263,7 +259,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   ;; Enable dictionary-based autocompletion.
   (add-hook! text-mode
     (add-hook 'completion-at-point-functions #'cape-dict 40 t))
-  (add-hook! prog-mode
+  (add-hook! (prog-mode conf-mode)
     (require 'cape)
     (add-hook 'completion-at-point-functions
               (cape-capf-inside-docstring-or-comment #'cape-dict)
