@@ -217,7 +217,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
     (add-hook 'completion-at-point-functions #'cape-elisp-block 0 t))
 
   ;; Enable Dabbrev completion basically everywhere as a fallback.
-  (add-hook! (text-mode conf-mode comint-mode)
+  (add-hook! (prog-mode text-mode conf-mode comint-mode)
     (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t))
 
   ;; Set the autocompletion backends to enable for the minibuffer.
