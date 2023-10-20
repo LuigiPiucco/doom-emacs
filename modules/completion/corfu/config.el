@@ -145,20 +145,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
       (keymap-set corfu-map (char-to-string +orderless-wildcard-character)
                   #'corfu-insert-separator)
       ;; Quit completion after typing the wildcard followed by a space.
-      (keymap-set corfu-map "SPC"
-                  (cmd! ()
-                        (when (and (> (point) (point-min))
-                                   (eq (char-before) +orderless-wildcard-character))
-                          (corfu-quit))
-                        (call-interactively
-                         (keymap-lookup
-                          (thread-last
-                            (current-active-maps t)
-                            (delq corfu-map)
-                            (delq (and (featurep 'evil)
-                                       (evil-get-auxiliary-keymap corfu-map
-                                                                  evil-state))))
-                          "SPC"))))
+      (keymap-set corfu-map "SPC" #'corfu-insert-space-maybe-quit)
 
       ;; Require that for Corfu, candidates begin with the first component of
       ;; the prefix. I added this because it was jarring to use `cape-dict' but
@@ -194,13 +181,6 @@ This variable needs to be set at the top-level before any `after!' blocks.")
       [return] #'corfu-insert))
 
   (after! vertico
-    ;; Taken from corfu's README.
-    ;; TODO: extend this to other completion front-ends.
-    (defun corfu-move-to-minibuffer ()
-      (interactive)
-      (let ((completion-extra-properties corfu--extra)
-            (completion-cycle-threshold completion-cycling))
-        (apply #'consult-completion-in-region completion-in-region--data)))
     (map! :map 'corfu-map "M-m" #'corfu-move-to-minibuffer)
     (after! evil-collection-corfu
       (evil-collection-define-key 'insert 'corfu-map

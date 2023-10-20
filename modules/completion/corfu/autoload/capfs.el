@@ -1,4 +1,4 @@
-;;; completion/corfu/autoload.el -*- lexical-binding: t; -*-
+;;; completion/corfu/autoload/capfs.el -*- lexical-binding: t; -*-
 
 (defun doom-point-in-docstring-or-comment-p ()
   "Check if the point is in a docstring or comment."
