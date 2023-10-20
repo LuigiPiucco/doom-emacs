@@ -243,6 +243,12 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   (advice-add #'eglot-completion-at-point :around #'cape-wrap-nonexclusive)
   (advice-add #'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
 
+  ;; From the `cape' readme. Without this, Eshell autocompletion is broken on
+  ;; Emacs28.
+  (when (< emacs-major-version 29)
+    (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
+    (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify))
+
   (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible))
 
 (use-package! yasnippet-capf
