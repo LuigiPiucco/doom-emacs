@@ -14,5 +14,5 @@
 
 (require 'cape)
 
-;;;###autoload (autoload 'cape-capf-inside-docstring-or-comment "completion/corfu/autoload")
+;;;###autoload (autoload 'cape-capf-inside-docstring-or-comment "completion/corfu/autoload/capfs")
 (cape--capf-wrapper inside-docstring-or-comment)
