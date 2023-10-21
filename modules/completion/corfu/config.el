@@ -145,15 +145,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
       (keymap-set corfu-map (char-to-string +orderless-wildcard-character)
                   #'corfu-insert-separator)
       ;; Quit completion after typing the wildcard followed by a space.
-      (keymap-set corfu-map "SPC" #'corfu-insert-space-maybe-quit)
-
-      ;; Require that for Corfu, candidates begin with the first component of
-      ;; the prefix. I added this because it was jarring to use `cape-dict' but
-      ;; see many words that did not begin with the prefix.
-      (add-hook! 'orderless-style-dispatchers
-        (defun +corfu-orderless-dispatch (pattern index total)
-          (when (and completion-in-region--data (eq index 0))
-            (cons 'orderless-regexp (concat "^" (regexp-quote pattern))))))))
+      (keymap-set corfu-map "SPC" #'corfu-insert-space-maybe-quit)))
 
   (add-hook! 'evil-insert-state-exit-hook
     (defun +corfu-quit-on-evil-insert-state-exit-h ()
