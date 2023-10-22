@@ -143,7 +143,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
             (+orderless-escapable-split-fn +orderless-wildcard-character))
       (setq corfu-separator +orderless-wildcard-character)
       (keymap-set corfu-map (char-to-string +orderless-wildcard-character)
-                  #'corfu-insert-separator)
+                  #'+corfu-insert-wildcard-separator)
       ;; Quit completion after typing the wildcard followed by a space.
       (keymap-set corfu-map "SPC" #'+corfu-insert-space-maybe-quit)))
 
