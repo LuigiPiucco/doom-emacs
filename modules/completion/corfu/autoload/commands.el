@@ -10,17 +10,20 @@
     (apply #'consult-completion-in-region completion-in-region--data)))
 
 ;;;###autoload
-(defun corfu-insert-space-maybe-quit ()
+(defun +corfu-insert-space-maybe-quit ()
+  ;; I had to rename this command so that it doesn't start with "corfu-".
+  ;; Otherwise, it does not insert the completion when +tng is enabled.
   (interactive)
   (when (and (> (point) (point-min))
-             (eq (char-before) +orderless-wildcard-character))
-    (corfu-quit))
-  (call-interactively
-   (keymap-lookup
-    (thread-last
-      (current-active-maps t)
-      (delq corfu-map)
-      (delq (and (featurep 'evil)
-                 (evil-get-auxiliary-keymap corfu-map
-                                            evil-state))))
-    "SPC")))
+           (eq (char-before) +orderless-wildcard-character))
+      (corfu-quit))
+  (let ((command (keymap-lookup
+                  (thread-last
+                    (current-active-maps t)
+                    (delq corfu-map)
+                    (delq (and (featurep 'evil)
+                               (evil-get-auxiliary-keymap corfu-map
+                                                          evil-state))))
+                  "SPC")))
+    (setq this-command command)
+    (call-interactively command)))

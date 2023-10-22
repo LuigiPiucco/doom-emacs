@@ -145,7 +145,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
       (keymap-set corfu-map (char-to-string +orderless-wildcard-character)
                   #'corfu-insert-separator)
       ;; Quit completion after typing the wildcard followed by a space.
-      (keymap-set corfu-map "SPC" #'corfu-insert-space-maybe-quit)))
+      (keymap-set corfu-map "SPC" #'+corfu-insert-space-maybe-quit)))
 
   (add-hook! 'evil-insert-state-exit-hook
     (defun +corfu-quit-on-evil-insert-state-exit-h ()
