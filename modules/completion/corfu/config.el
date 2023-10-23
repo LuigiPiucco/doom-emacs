@@ -208,8 +208,11 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   (when (> emacs-major-version 28)
     (add-hook! (prog-mode conf-mode)
       (add-hook 'completion-at-point-functions
-                (cape-capf-inside-docstring-or-comment
-                 (cape-capf-prefix-length #'cape-emoji 1))
+                (cape-capf-inside-faces
+                 (cape-capf-prefix-length #'cape-emoji 1)
+                 ;; Only call inside comments and docstrings.
+                 'tree-sitter-hl-face:doc 'font-lock-doc-face
+                 'font-lock-comment-face 'tree-sitter-hl-face:comment)
                 10 t))
     (add-hook! text-mode
       (add-hook 'completion-at-point-functions
@@ -220,7 +223,10 @@ This variable needs to be set at the top-level before any `after!' blocks.")
     (add-hook 'completion-at-point-functions #'cape-dict 40 t))
   (add-hook! (prog-mode conf-mode)
     (add-hook 'completion-at-point-functions
-              (cape-capf-inside-docstring-or-comment #'cape-dict)
+              (cape-capf-inside-faces
+              ;; Only call inside comments and docstrings.
+               #'cape-dict 'tree-sitter-hl-face:doc 'font-lock-doc-face
+               'font-lock-comment-face 'tree-sitter-hl-face:comment)
               40 t))
 
   ;; Make these capfs composable.
