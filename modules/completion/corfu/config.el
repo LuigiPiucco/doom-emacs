@@ -132,9 +132,6 @@ This variable needs to be set at the top-level before any `after!' blocks.")
                                (_ x)))
                            s 'fixedcase 'literal)
                           ,(concat "[ " char-string "]+")
-                          ;; If we want some fancy logic in the future for
-                          ;; ",PREFIX", we will have to keep nulls but for now,
-                          ;; remove them.
                           t)))))
     (after! orderless
       ;; Orderless splits the string into components and then determines the
