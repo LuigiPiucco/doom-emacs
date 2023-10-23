@@ -1,7 +1,10 @@
 ;;; completion/corfu/config.el -*- lexical-binding: t; -*-
 
 (defvar +cape-buffer-scanning-size-limit (* 1 1024 1024) ; 1 MB
-  "Size limit for a buffer to be scanned by `cape-line' or `cape-dabbrev'.")
+  "Size limit for a buffer to be scanned by `cape-line' or `cape-dabbrev'.
+
+As an exception, `cape-line' will also scan buffers with the same
+major mode regardless of size.")
 
 (defvar +orderless-wildcard-character ?,
   "A character used as a wildcard in Corfu for fuzzy autocompletion. If you
