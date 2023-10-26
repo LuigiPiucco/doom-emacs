@@ -1,5 +1,14 @@
 ;;; completion/corfu/autoload/commands.el -*- lexical-binding: t; -*-
 
+(defun +corfu--get-passthrough-command ()
+  (keymap-lookup
+   (thread-last
+     (current-active-maps t)
+     (delq corfu-map)
+     (delq (and (featurep 'evil)
+                (evil-get-auxiliary-keymap corfu-map evil-state))))
+   (key-description (this-command-keys-vector))))
+
 ;;;###autoload
 (defun corfu-move-to-minibuffer ()
   ;; Taken from corfu's README.
@@ -15,16 +24,9 @@
   ;; Otherwise, it does not insert the completion when +tng is enabled.
   (interactive)
   (when (and (> (point) (point-min))
-           (eq (char-before) +orderless-wildcard-character))
-      (corfu-quit))
-  (let ((command (keymap-lookup
-                  (thread-last
-                    (current-active-maps t)
-                    (delq corfu-map)
-                    (delq (and (featurep 'evil)
-                               (evil-get-auxiliary-keymap corfu-map
-                                                          evil-state))))
-                  "SPC")))
+             (eq (char-before) +orderless-wildcard-character))
+    (corfu-quit))
+  (let ((command (+corfu--get-passthrough-command)))
     (setq this-command command)
     (call-interactively command)))
 
@@ -35,3 +37,15 @@
   (interactive)
   (setq this-command #'corfu-insert-separator)
   (call-interactively #'corfu-insert-separator))
+
+;;;###autoload
+(defun corfu-reset-completion-or-backspace ()
+  (interactive)
+  (let ((command (+corfu--get-passthrough-command)))
+    (if (and (> corfu--index -1)
+             (eq corfu-preview-current 'insert))
+        (progn
+          (setq this-command #'corfu-reset)
+          (call-interactively #'corfu-reset))
+      (setq this-command command)
+      (call-interactively command))))

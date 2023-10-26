@@ -155,7 +155,6 @@ This variable needs to be set at the top-level before any `after!' blocks.")
       (when (eq (current-buffer) (window-buffer (selected-window)))
         (corfu-quit))))
 
-
   (when (modulep! +icons)
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
@@ -163,6 +162,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
          (:when (modulep! +orderless)
           "C-SPC" #'corfu-insert-separator)
          (:when (modulep! +tng)
+          "DEL" #'corfu-reset-completion-or-backspace
           [tab] #'corfu-next
           [backtab] #'corfu-previous
           "TAB" #'corfu-next
@@ -224,7 +224,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   (add-hook! (prog-mode conf-mode)
     (add-hook 'completion-at-point-functions
               (cape-capf-inside-faces
-              ;; Only call inside comments and docstrings.
+               ;; Only call inside comments and docstrings.
                #'cape-dict 'tree-sitter-hl-face:doc 'font-lock-doc-face
                'font-lock-comment-face 'tree-sitter-hl-face:comment)
               40 t))
