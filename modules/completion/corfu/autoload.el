@@ -1,6 +1,10 @@
 ;;; completion/corfu/autoload/commands.el -*- lexical-binding: t; -*-
 
 (defun +corfu--get-passthrough-command ()
+  ;; This function doesn't translate keys and I don't know how to change that. I
+  ;; submitted bug report #66755 about this. But for now, do not use this with
+  ;; keys like "<backspace>" or "<delete>", only use it with basic ANSI
+  ;; key sequences.
   (keymap-lookup
    (thread-last
      (current-active-maps t)
