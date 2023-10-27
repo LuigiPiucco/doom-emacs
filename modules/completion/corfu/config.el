@@ -188,10 +188,14 @@ This variable needs to be set at the top-level before any `after!' blocks.")
                     (< (buffer-size buf) +cape-buffer-scanning-size-limit))
              collect buf))
   (defun +dabbrev-friend-buffer-p (other-buffer)
-    (< (buffer-size other-buffer +cape-buffer-scanning-size-limit)))
+    (< (buffer-size other-buffer) +cape-buffer-scanning-size-limit))
   (setq cape-dabbrev-check-other-buffers t
         cape-line-buffer-function #'+cape-line-buffers
         dabbrev-friend-buffer-function #'+dabbrev-friend-buffer-p
+        dabbrev-ignored-buffer-regexps
+        '("\\.\\(?:pdf\\|jpe?g\\|png\\|svg\\|eps\\)\\'"
+          "^ "
+          "\\(TAGS\\|tags\\|ETAGS\\|etags\\|GTAGS\\|GRTAGS\\|GPATH\\)\\(<[0-9]+>\\)?")
         dabbrev-upcase-means-case-search t)
 
   (add-hook! prog-mode
