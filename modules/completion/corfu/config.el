@@ -83,15 +83,6 @@ This variable needs to be set at the top-level before any `after!' blocks.")
         (apply (timer--function evil--ex-search-update-timer)
                (timer--args evil--ex-search-update-timer)))))
 
-  ;; Do not make us type RET twice with Corfu.
-  (defun corfu--maybe-return-filter (cmd)
-    (if (eq corfu--index -1) (corfu-quit) cmd))
-  (keymap-set corfu-map "RET" `(menu-item "corfu-maybe-return" corfu-insert
-                                :filter corfu--maybe-return-filter))
-  (keymap-set
-   corfu-map "<return>" `(menu-item "corfu-maybe-return" corfu-insert
-                          :filter corfu--maybe-return-filter))
-
   ;; Allow completion after `:' in Lispy.
   (add-to-list 'corfu-auto-commands #'lispy-colon)
 
@@ -133,18 +124,16 @@ This variable needs to be set at the top-level before any `after!' blocks.")
       (setq orderless-component-separator
             (+orderless-escapable-split-fn +orderless-wildcard-character))
       (setq corfu-separator +orderless-wildcard-character)
-      (keymap-set corfu-map (char-to-string +orderless-wildcard-character)
-                  #'+corfu-insert-wildcard-separator)
-      ;; Quit completion after typing the wildcard followed by a space.
-      (keymap-set corfu-map "SPC"
-                  `(menu-item "corfu-maybe-quit" nil
-                    :filter
-                    ,(lambda (_)
-                       (when (and (> (point) (point-min))
-                                  (eq (char-before)
-                                      +orderless-wildcard-character))
-                         (corfu-quit)
-                         nil))))))
+      (defun +corfu--maybe-quit-spc-filter (cmd)
+        (when (and (> (point) (point-min))
+                   (eq (char-before) +orderless-wildcard-character))
+          cmd))
+      (let ((wildstr (char-to-string +orderless-wildcard-character))
+            (mi-spc '(menu-item "corfu-maybe-quit" corfu-reset :filter +corfu--maybe-quit-spc-filter)))
+        (map! :map corfu-map
+              wildstr #'+corfu-insert-wildcard-separator
+              ;; Quit completion after typing the wildcard followed by a space.
+              "SPC" mi-spc))))
 
   (add-hook! 'evil-insert-state-exit-hook
     (defun +corfu-quit-on-evil-insert-state-exit-h ()
@@ -157,36 +146,34 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   (when (modulep! +icons)
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
-  ;; Reset completion DWIM-style with backspace.
-  (when (modulep! +tng)
-    (defun corfu--maybe-reset-backspace-filter (cmd)
-      (when (and (> corfu--index -1)
-                 (eq corfu-preview-current 'insert))
-        cmd))
-    (keymap-set corfu-map "DEL" `(menu-item "corfu-maybe-reset" corfu-reset
-                                  :filter corfu--maybe-reset-backspace-filter))
-    (keymap-set
-     corfu-map "<backspace>" `(menu-item "corfu-maybe-reset" corfu-reset
-                               :filter corfu--maybe-reset-backspace-filter)))
-
-  (map! (:map 'corfu-map
-         (:when (modulep! +orderless)
-          :gi "C-SPC" #'corfu-insert-separator)
-         (:when (modulep! +tng)
-          [tab] #'corfu-next
-          [backtab] #'corfu-previous
-          "TAB" #'corfu-next
-          "S-TAB" #'corfu-previous)))
-  (after! evil-collection-corfu
-    (evil-collection-define-key 'insert 'corfu-map
-      (kbd "RET") #'corfu-insert
-      [return] #'corfu-insert))
+  (defun +corfu--maybe-reset-backspace-filter (cmd)
+    (when (and (modulep! +tng)
+               (> corfu--index -1)
+               (eq corfu-preview-current 'insert))
+      cmd))
+  (defun +corfu--maybe-quit-return-filter (cmd)
+    (let ((corfu--index (if (> corfu--index -1) corfu--index 0)))
+      (corfu-insert))
+    cmd)
+  (let ((mi-del '(menu-item "corfu-maybe-reset-backspace-filter" corfu-reset
+                  :filter +corfu--maybe-reset-backspace-filter)))
+    (map! :map corfu-map
+          [return] #'corfu-insert
+          "RET" #'corfu-insert
+          (:when (modulep! +orderless)
+            :gi "C-SPC" #'corfu-insert-separator)
+          (:when (modulep! +tng)
+            [tab] #'corfu-next
+            [backtab] #'corfu-previous
+            "TAB" #'corfu-next
+            "S-TAB" #'corfu-previous
+            [backspace] mi-del
+            "DEL" mi-del)))
 
   (after! vertico
-    (map! :map 'corfu-map "M-m" #'corfu-move-to-minibuffer)
-    (after! evil-collection-corfu
-      (evil-collection-define-key 'insert 'corfu-map
-        (kbd "M-j") #'corfu-move-to-minibuffer))))
+    (map! :map corfu-map
+          "M-m" #'corfu-move-to-minibuffer
+          (:when (modulep! :editor evil) "M-J" #'corfu-move-to-minibuffer))))
 
 (use-package! cape
   :defer t
@@ -281,15 +268,15 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   :hook (corfu-mode . corfu-popupinfo-mode)
   :config
   (setq corfu-popupinfo-delay '(0.5 . 1.0))
-  (map! (:map 'corfu-map
-              "C-<up>" #'corfu-popupinfo-scroll-down
-              "C-<down>" #'corfu-popupinfo-scroll-up
-              "C-S-p" #'corfu-popupinfo-scroll-down
-              "C-S-n" #'corfu-popupinfo-scroll-up
-              "C-h" #'corfu-popupinfo-toggle)
-        (:map 'corfu-popupinfo-map
-         :when (modulep! :editor evil)
-         ;; Reversed because popupinfo assumes opposite of what feels intuitive
-         ;; with evil.
-         "C-S-k" #'corfu-popupinfo-scroll-down
-         "C-S-j" #'corfu-popupinfo-scroll-up)))
+  (map! :map corfu-map
+        "C-<up>" #'corfu-popupinfo-scroll-down
+        "C-<down>" #'corfu-popupinfo-scroll-up
+        "C-S-p" #'corfu-popupinfo-scroll-down
+        "C-S-n" #'corfu-popupinfo-scroll-up
+        "C-h" #'corfu-popupinfo-toggle)
+  (map! :when (modulep! :editor evil)
+        :map corfu-popupinfo-map
+        ;; Reversed because popupinfo assumes opposite of what feels intuitive
+        ;; with evil.
+        "C-S-k" #'corfu-popupinfo-scroll-down
+        "C-S-j" #'corfu-popupinfo-scroll-up))
