@@ -178,35 +178,39 @@ This variable needs to be set at the top-level before any `after!' blocks.")
 (use-package! cape
   :defer t
   :init
-  ;; Set up `cape-dabbrev' and `cape-line' options.
-  (defun +cape-line-buffers ()
-    (cl-loop for buf in (buffer-list)
-             if (or (eq major-mode (buffer-local-value 'major-mode buf))
-                    (< (buffer-size buf) +cape-buffer-scanning-size-limit))
-             collect buf))
-  (defun +dabbrev-friend-buffer-p (other-buffer)
-    (< (buffer-size other-buffer) +cape-buffer-scanning-size-limit))
-  (setq cape-dabbrev-check-other-buffers t
-        cape-line-buffer-function #'+cape-line-buffers
-        dabbrev-friend-buffer-function #'+dabbrev-friend-buffer-p
-        dabbrev-ignored-buffer-regexps
-        '("\\.\\(?:pdf\\|jpe?g\\|png\\|svg\\|eps\\)\\'"
-          "^ "
-          "\\(TAGS\\|tags\\|ETAGS\\|etags\\|GTAGS\\|GRTAGS\\|GPATH\\)\\(<[0-9]+>\\)?")
-        dabbrev-upcase-means-case-search t)
-
   (add-hook! prog-mode
     (add-hook 'completion-at-point-functions #'cape-file -10 t))
   (add-hook! (org-mode markdown-mode)
     (add-hook 'completion-at-point-functions #'cape-elisp-block 0 t))
 
   ;; Enable Dabbrev completion basically everywhere as a fallback.
-  (add-hook! (prog-mode text-mode conf-mode comint-mode minibuffer-setup
-                        eshell-mode)
-    (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t))
+  (when (modulep! +dabbrev)
+    ;; Set up `cape-dabbrev' options.
+    (defun +dabbrev-friend-buffer-p (other-buffer)
+      (< (buffer-size other-buffer) +cape-buffer-scanning-size-limit))
+    (setq cape-dabbrev-check-other-buffers t
+          dabbrev-friend-buffer-function #'+dabbrev-friend-buffer-p
+          dabbrev-ignored-buffer-regexps
+          '("\\.\\(?:pdf\\|jpe?g\\|png\\|svg\\|eps\\)\\'"
+            "^ "
+            "\\(TAGS\\|tags\\|ETAGS\\|etags\\|GTAGS\\|GRTAGS\\|GPATH\\)\\(<[0-9]+>\\)?")
+          dabbrev-upcase-means-case-search t)
+    (add-hook! (prog-mode text-mode conf-mode comint-mode minibuffer-setup
+                          eshell-mode)
+      (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t)))
+  (when (modulep! +line)
+    ;; Set up `cape-line' options.
+    (defun +cape-line-buffers ()
+      (cl-loop for buf in (buffer-list)
+               if (or (eq major-mode (buffer-local-value 'major-mode buf))
+                      (< (buffer-size buf) +cape-buffer-scanning-size-limit))
+               collect buf))
+    (setq cape-line-buffer-function #'+cape-line-buffers)
+    (add-hook! (text-mode comint-mode minibuffer-setup)
+      (add-hook 'completion-at-point-functions #'cape-line 20 t)))
 
   ;; Complete emojis :).
-  (when (> emacs-major-version 28)
+  (when (and (modulep! +emoji) (> emacs-major-version 28))
     (add-hook! (prog-mode conf-mode)
       (add-hook 'completion-at-point-functions
                 (cape-capf-inside-faces
@@ -220,15 +224,16 @@ This variable needs to be set at the top-level before any `after!' blocks.")
                 (cape-capf-prefix-length #'cape-emoji 1) 10 t)))
 
   ;; Enable dictionary-based autocompletion.
-  (add-hook! text-mode
-    (add-hook 'completion-at-point-functions #'cape-dict 40 t))
-  (add-hook! (prog-mode conf-mode)
-    (add-hook 'completion-at-point-functions
-              (cape-capf-inside-faces
-               ;; Only call inside comments and docstrings.
-               #'cape-dict 'tree-sitter-hl-face:doc 'font-lock-doc-face
-               'font-lock-comment-face 'tree-sitter-hl-face:comment)
-              40 t))
+  (when (modulep! +dict)
+    (add-hook! text-mode
+      (add-hook 'completion-at-point-functions #'cape-dict 40 t))
+    (add-hook! (prog-mode conf-mode)
+      (add-hook 'completion-at-point-functions
+                (cape-capf-inside-faces
+                 ;; Only call inside comments and docstrings.
+                 #'cape-dict 'tree-sitter-hl-face:doc 'font-lock-doc-face
+                 'font-lock-comment-face 'tree-sitter-hl-face:comment)
+                40 t)))
 
   ;; Make these capfs composable.
   (advice-add #'comint-completion-at-point :around #'cape-wrap-nonexclusive)
