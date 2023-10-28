@@ -145,7 +145,15 @@ This variable needs to be set at the top-level before any `after!' blocks.")
       (keymap-set corfu-map (char-to-string +orderless-wildcard-character)
                   #'+corfu-insert-wildcard-separator)
       ;; Quit completion after typing the wildcard followed by a space.
-      (keymap-set corfu-map "SPC" #'+corfu-insert-space-maybe-quit)))
+      (keymap-set corfu-map "SPC"
+                  `(menu-item "corfu-maybe-quit" nil
+                    :filter
+                    ,(lambda (cmd)
+                       (when (and (> (point) (point-min))
+                                  (eq (char-before)
+                                      +orderless-wildcard-character))
+                         (corfu-quit)
+                         nil))))))
 
   (add-hook! 'evil-insert-state-exit-hook
     (defun +corfu-quit-on-evil-insert-state-exit-h ()
@@ -158,11 +166,25 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   (when (modulep! +icons)
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
+  ;; Reset completion DWIM-style with backspace.
+  (when (modulep! +tng)
+    (defun corfu--maybe-reset-backspace-filter (cmd)
+      (when (and (> corfu--index -1)
+                 (eq corfu-preview-current 'insert))
+        cmd))
+    (keymap-set
+     corfu-map "DEL"
+     `(menu-item "corfu-maybe-reset-backspace" corfu-reset
+       :filter corfu--maybe-reset-backspace-filter))
+    (keymap-set
+     corfu-map "<backspace>"
+     `(menu-item "corfu-maybe-reset-backspace" corfu-reset
+       :filter corfu--maybe-reset-backspace-filter)))
+
   (map! (:map 'corfu-map
          (:when (modulep! +orderless)
           "C-SPC" #'corfu-insert-separator)
          (:when (modulep! +tng)
-          "DEL" #'corfu-reset-completion-or-backspace
           [tab] #'corfu-next
           [backtab] #'corfu-previous
           "TAB" #'corfu-next
