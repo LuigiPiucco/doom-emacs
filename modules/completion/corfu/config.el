@@ -148,7 +148,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
       (keymap-set corfu-map "SPC"
                   `(menu-item "corfu-maybe-quit" nil
                     :filter
-                    ,(lambda (cmd)
+                    ,(lambda (_)
                        (when (and (> (point) (point-min))
                                   (eq (char-before)
                                       +orderless-wildcard-character))
