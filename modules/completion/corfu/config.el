@@ -89,7 +89,6 @@ This variable needs to be set at the top-level before any `after!' blocks.")
       (apply oldfun args)
       (when (and (member (this-command-keys-vector)
                          (list (vector 'return) (vector ?\r)))
-                 (eq (point) (point-at-eol))
                  ;; Only do this if we did not select a completion.
                  (eq index -1))
         (call-interactively
