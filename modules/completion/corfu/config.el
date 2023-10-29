@@ -82,23 +82,14 @@ This variable needs to be set at the top-level before any `after!' blocks.")
         (apply (timer--function evil--ex-search-update-timer)
                (timer--args evil--ex-search-update-timer)))))
 
-  (defadvice! +corfu--return-insert-a (oldfun &rest args)
-    "Do not make us type RET twice with Corfu."
-    :around #'corfu-insert
-    (let ((index corfu--index))
-      (apply oldfun args)
-      (when (and (member (this-command-keys-vector)
-                         (list (vector 'return) (vector ?\r)))
-                 ;; Only do this if we did not select a completion.
-                 (eq index -1))
-        (call-interactively
-         (keymap-lookup
-          (thread-last (current-active-maps t)
-                       (delq corfu-map)
-                       (delq (and (featurep 'evil)
-                                  (evil-get-auxiliary-keymap corfu-map
-                                                             evil-state))))
-          "RET")))))
+  ;; Do not make us type RET twice with Corfu.
+  (defun corfu--maybe-return-filter (cmd)
+    (if (eq corfu--index -1) (corfu-quit) cmd))
+  (keymap-set corfu-map "RET" `(menu-item "corfu-maybe-return" corfu-insert
+                                :filter corfu--maybe-return-filter))
+  (keymap-set
+   corfu-map "<return>" `(menu-item "corfu-maybe-return" corfu-insert
+                          :filter corfu--maybe-return-filter))
 
   ;; Allow completion after `:' in Lispy.
   (add-to-list 'corfu-auto-commands #'lispy-colon)
@@ -171,14 +162,11 @@ This variable needs to be set at the top-level before any `after!' blocks.")
       (when (and (> corfu--index -1)
                  (eq corfu-preview-current 'insert))
         cmd))
+    (keymap-set corfu-map "DEL" `(menu-item "corfu-maybe-reset" corfu-reset
+                                  :filter corfu--maybe-reset-backspace-filter))
     (keymap-set
-     corfu-map "DEL"
-     `(menu-item "corfu-maybe-reset-backspace" corfu-reset
-       :filter corfu--maybe-reset-backspace-filter))
-    (keymap-set
-     corfu-map "<backspace>"
-     `(menu-item "corfu-maybe-reset-backspace" corfu-reset
-       :filter corfu--maybe-reset-backspace-filter)))
+     corfu-map "<backspace>" `(menu-item "corfu-maybe-reset" corfu-reset
+                               :filter corfu--maybe-reset-backspace-filter)))
 
   (map! (:map 'corfu-map
          (:when (modulep! +orderless)
