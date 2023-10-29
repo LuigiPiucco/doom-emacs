@@ -6,13 +6,6 @@
 As an exception, `cape-line' will also scan buffers with the same
 major mode regardless of size.")
 
-(defvar +orderless-wildcard-character ?,
-  "A character used as a wildcard in Corfu for fuzzy autocompletion. If you
-want to match the wildcard literally in completion, you can
-escape it with forward slash. Do NOT set this to SPC.
-
-This variable needs to be set at the top-level before any `after!' blocks.")
-
 ;;
 ;;; Packages
 (use-package! corfu
@@ -24,6 +17,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   (setq corfu-auto t
         corfu-auto-delay 0.1
         corfu-auto-prefix 2
+        corfu-separator ?\s
         corfu-excluded-modes '(erc-mode
                                circe-mode
                                help-mode
@@ -39,7 +33,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
         corfu-max-width 120
         corfu-preview-current 'insert
         corfu-on-exact-match nil
-        corfu-quit-at-boundary (if (modulep! +orderless) 'separator t)
+        corfu-quit-at-boundary t
         corfu-quit-no-match (if (modulep! +orderless) 'separator t)
         ;; In the case of +tng, TAB should be smart regarding completion;
         ;; However, it should otherwise behave like normal, whatever normal was.
@@ -56,7 +50,7 @@ This variable needs to be set at the top-level before any `after!' blocks.")
     (unless (corfu-disable-in-minibuffer-p)
       (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
                   corfu-popupinfo-delay nil)
-      (corfu-mode 1)))
+      (corfu-mode +1)))
 
   (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
 
@@ -86,54 +80,9 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   ;; Allow completion after `:' in Lispy.
   (add-to-list 'corfu-auto-commands #'lispy-colon)
 
-  (when (and (modulep! +orderless)
-             +orderless-wildcard-character)
-    (defmacro +orderless-escapable-split-fn (char)
-      (let ((char-string (string (if (symbolp char) (symbol-value char) char))))
-        `(defun +orderless-escapable-split-on-space-or-char (s)
-           (mapcar
-            (lambda (piece)
-              (replace-regexp-in-string
-               (string 1) ,char-string
-               (replace-regexp-in-string
-                (concat (string 0) "\\|" (string 1))
-                (lambda (x)
-                  (pcase x
-                    ("\0" " ")
-                    ("\1" ,char-string)
-                    (_ x)))
-                piece
-                ;; These are arguments to `replace-regexp-in-string'.
-                'fixedcase 'literal)
-               'fixedcase 'literal))
-            (split-string (replace-regexp-in-string
-                           (concat "\\\\\\\\\\|\\\\ \\|\\\\"
-                                   ,char-string)
-                           (lambda (x)
-                             (pcase x
-                               ("\\ " "\0")
-                               (,(concat "\\" char-string)
-                                "\1")
-                               (_ x)))
-                           s 'fixedcase 'literal)
-                          ,(concat "[ " char-string "]+")
-                          t)))))
+  (when (modulep! +orderless)
     (after! orderless
-      ;; Orderless splits the string into components and then determines the
-      ;; matching style for each component. This is all regexp stuff.
-      (setq orderless-component-separator
-            (+orderless-escapable-split-fn +orderless-wildcard-character))
-      (setq corfu-separator +orderless-wildcard-character)
-      (defun +corfu--maybe-quit-spc-filter (cmd)
-        (when (and (> (point) (point-min))
-                   (eq (char-before) +orderless-wildcard-character))
-          cmd))
-      (let ((wildstr (char-to-string +orderless-wildcard-character))
-            (mi-spc '(menu-item "corfu-maybe-quit" corfu-reset :filter +corfu--maybe-quit-spc-filter)))
-        (map! :map corfu-map
-              wildstr #'+corfu-insert-wildcard-separator
-              ;; Quit completion after typing the wildcard followed by a space.
-              "SPC" mi-spc))))
+      (setq orderless-component-separator #'orderless-escapable-split-on-space)))
 
   (add-hook! 'evil-insert-state-exit-hook
     (defun +corfu-quit-on-evil-insert-state-exit-h ()
@@ -146,22 +95,34 @@ This variable needs to be set at the top-level before any `after!' blocks.")
   (when (modulep! +icons)
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
-  (defun +corfu--maybe-reset-backspace-filter (cmd)
+  (defun +corfu--reset-or-passthrough (cmd)
     (when (and (modulep! +tng)
                (> corfu--index -1)
                (eq corfu-preview-current 'insert))
       cmd))
-  (defun +corfu--maybe-quit-return-filter (cmd)
-    (let ((corfu--index (if (> corfu--index -1) corfu--index 0)))
-      (corfu-insert))
-    cmd)
-  (let ((mi-del '(menu-item "corfu-maybe-reset-backspace-filter" corfu-reset
-                  :filter +corfu--maybe-reset-backspace-filter)))
+  (defun +corfu--backward-toggle-escape-sep (cmd)
+    (save-excursion
+      (backward-char 1)
+      (if (looking-back "\\\\" -1)
+          #'corfu-reset
+        (lambda ()
+          (interactive)
+          (save-excursion
+            (backward-char 1)
+            (insert-char ?\\))))))
+  (defun +corfu--insert-separator-or-toggle-escape (cmd)
+    (if (char-equal (char-before) corfu-separator)
+        (+corfu--backward-toggle-escape-sep cmd)
+      cmd))
+  (let ((mi-del '(menu-item "corfu-reset-or-passthrough" corfu-reset
+                  :filter +corfu--maybe-reset-backspace-filter))
+        (mi-c-spc '(menu-item "corfu-insert-separator-or-toggle-escape" corfu-insert-separator
+                    :filter +corfu--insert-separator-or-toggle-escape)))
     (map! :map corfu-map
           [return] #'corfu-insert
           "RET" #'corfu-insert
           (:when (modulep! +orderless)
-            :gi "C-SPC" #'corfu-insert-separator)
+            :gi "C-SPC" mi-c-spc)
           (:when (modulep! +tng)
             [tab] #'corfu-next
             [backtab] #'corfu-previous
@@ -176,7 +137,6 @@ This variable needs to be set at the top-level before any `after!' blocks.")
           (:when (modulep! :editor evil) "M-J" #'corfu-move-to-minibuffer))))
 
 (use-package! cape
-  :defer t
   :commands
   cape-abbrev
   cape-dabbrev
