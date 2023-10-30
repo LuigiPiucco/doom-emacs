@@ -2,7 +2,7 @@
 ;;; completion/corfu/packages.el
 
 (package! corfu :recipe (:files ("*.el" "extensions/*.el")) :pin "b2b9a2312f58117514724e729fda43efc4433ecd")
-(package! cape :pin "116063b9ee912cbaa7318dbe6597ade4a62b3f59")
+(package! cape :pin "bee13e568d42ffec9010fbf795e8f942973da174")
 (when (modulep! +icons)
   (package! nerd-icons-completion :pin "c2db8557a3c1a9588d111f8c8e91cae96ee85010")
   (package! nerd-icons-corfu :pin "5082a22dfbdea092fcc475db3484cb3ff812b730"))
