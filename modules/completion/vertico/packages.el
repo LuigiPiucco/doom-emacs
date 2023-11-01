@@ -6,7 +6,7 @@
            :files ("*.el" "extensions/*.el"))
   :pin "a28370d07f35c5387c7a9ec2e5b67f0d4598058d")
 
-(package! orderless :pin "e6784026717a8a6a7dcd0bf31fd3414f148c542e")
+(package! orderless :pin "89eb3775daa53cfb52ad03015410c23f28c72d30")
 
 (package! consult :pin "fe49dedd71802ff97be7b89f1ec4bd61b98c2b13")
 (package! consult-dir :pin "ed8f0874d26f10f5c5b181ab9f2cf4107df8a0eb")
