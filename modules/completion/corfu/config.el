@@ -188,28 +188,30 @@ major mode regardless of size.")
     (add-hook 'completion-at-point-functions #'cape-elisp-block 0 t))
 
   ;; Enable Dabbrev completion basically everywhere as a fallback.
+  ;; Set up `cape-dabbrev' options.
+  (defun +dabbrev-friend-buffer-p (other-buffer)
+    (< (buffer-size other-buffer) +cape-buffer-scanning-size-limit))
+  (setq cape-dabbrev-check-other-buffers t
+        dabbrev-friend-buffer-function #'+dabbrev-friend-buffer-p
+        dabbrev-ignored-buffer-regexps
+        '("\\.\\(?:pdf\\|jpe?g\\|png\\|svg\\|eps\\)\\'"
+          "^ "
+          "\\(TAGS\\|tags\\|ETAGS\\|etags\\|GTAGS\\|GRTAGS\\|GPATH\\)\\(<[0-9]+>\\)?")
+        dabbrev-upcase-means-case-search t)
   (when (modulep! +dabbrev)
-    ;; Set up `cape-dabbrev' options.
-    (defun +dabbrev-friend-buffer-p (other-buffer)
-      (< (buffer-size other-buffer) +cape-buffer-scanning-size-limit))
-    (setq cape-dabbrev-check-other-buffers t
-          dabbrev-friend-buffer-function #'+dabbrev-friend-buffer-p
-          dabbrev-ignored-buffer-regexps
-          '("\\.\\(?:pdf\\|jpe?g\\|png\\|svg\\|eps\\)\\'"
-            "^ "
-            "\\(TAGS\\|tags\\|ETAGS\\|etags\\|GTAGS\\|GRTAGS\\|GPATH\\)\\(<[0-9]+>\\)?")
-          dabbrev-upcase-means-case-search t)
     (add-hook! (prog-mode text-mode conf-mode comint-mode minibuffer-setup
                           eshell-mode)
       (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t)))
+
+
+  ;; Set up `cape-line' options.
+  (defun +cape-line-buffers ()
+    (cl-loop for buf in (buffer-list)
+             if (or (eq major-mode (buffer-local-value 'major-mode buf))
+                    (< (buffer-size buf) +cape-buffer-scanning-size-limit))
+             collect buf))
+  (setq cape-line-buffer-function #'+cape-line-buffers)
   (when (modulep! +line)
-    ;; Set up `cape-line' options.
-    (defun +cape-line-buffers ()
-      (cl-loop for buf in (buffer-list)
-               if (or (eq major-mode (buffer-local-value 'major-mode buf))
-                      (< (buffer-size buf) +cape-buffer-scanning-size-limit))
-               collect buf))
-    (setq cape-line-buffer-function #'+cape-line-buffers)
     (add-hook! (text-mode comint-mode minibuffer-setup)
       (add-hook 'completion-at-point-functions #'cape-line 20 t)))
 
