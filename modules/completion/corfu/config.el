@@ -12,6 +12,10 @@ major mode regardless of size.")
   :hook (doom-first-buffer . global-corfu-mode)
   :hook (org-mode . corfu-mode)
   :init
+  (when (modulep! +orderless)
+    (after! orderless
+      (setq orderless-component-separator #'orderless-escapable-split-on-space)))
+
   ;; Auto-completion settings, must be set before calling `global-corfu-mode'.
   ;; Due to lazy-loading, overriding these in config.el works too.
   (setq corfu-auto t
@@ -79,10 +83,6 @@ major mode regardless of size.")
 
   ;; Allow completion after `:' in Lispy.
   (add-to-list 'corfu-auto-commands #'lispy-colon)
-
-  (when (modulep! +orderless)
-    (after! orderless
-      (setq orderless-component-separator #'orderless-escapable-split-on-space)))
 
   (add-hook! 'evil-insert-state-exit-hook
     (defun +corfu-quit-on-evil-insert-state-exit-h ()
