@@ -69,7 +69,7 @@ You should use `set-eshell-alias!' to change this.")
         ;; TODO Use `eshell-input-filter-initial-space' when Emacs 25 support is dropped
         eshell-input-filter (lambda (input) (not (string-match-p "\\`\\s-+" input)))
         ;; em-prompt
-        eshell-prompt-regexp "^.* λ "
+        eshell-prompt-regexp "^[^#$\n]* [#$λ] "
         eshell-prompt-function #'+eshell-default-prompt-fn
         ;; em-glob
         eshell-glob-case-insensitive t
@@ -104,6 +104,12 @@ You should use `set-eshell-alias!' to change this.")
   ;; Remove hscroll-margin in shells, otherwise you get jumpiness when the
   ;; cursor comes close to the left/right edges of the window.
   (setq-hook! 'eshell-mode-hook hscroll-margin 0)
+
+  ;; Recognize prompts as Imenu entries.
+  (setq-hook! 'eshell-mode-hook
+    imenu-generic-expression
+    `((,(propertize "λ" 'face 'eshell-prompt)
+       ,(concat eshell-prompt-regexp "\\(.*\\)") 1)))
 
   ;; Don't auto-write our aliases! Let us manage our own `eshell-aliases-file'
   ;; or configure `+eshell-aliases' via elisp.
@@ -230,7 +236,9 @@ Emacs versions < 29."
 
 
 (use-package eshell-syntax-highlighting
-  :hook (eshell-mode . eshell-syntax-highlighting-mode))
+  :hook (eshell-mode . eshell-syntax-highlighting-mode)
+  :init
+  (add-hook 'eshell-syntax-highlighting-elisp-buffer-setup-hook #'highlight-quoted-mode))
 
 
 (use-package! fish-completion

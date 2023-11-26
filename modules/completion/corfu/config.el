@@ -9,8 +9,8 @@ major mode regardless of size.")
 ;;
 ;;; Packages
 (use-package! corfu
-  :hook (doom-first-buffer . global-corfu-mode)
-  :hook (org-mode . corfu-mode)
+  :hook ((doom-first-buffer . global-corfu-mode)
+         (org-mode . corfu-mode))
   :init
   (when (modulep! +orderless)
     (after! orderless
