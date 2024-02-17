@@ -469,10 +469,10 @@ Continues comments if executed from a commented line. Consults
          (:when (modulep! :completion corfu +orderless)
           [remap completion-at-point] #'+corfu-smart-sep-toggle-escape)
          (:when (modulep! :completion corfu +tng)
-          [tab] #'corfu-next
-          "TAB" #'corfu-next
-          [backtab] #'corfu-previous
-          "S-TAB" #'corfu-previous))
+          :gi [tab] #'corfu-next
+          :gi "TAB" #'corfu-next
+          :gi [backtab] #'corfu-previous
+          :gi "S-TAB" #'corfu-previous))
         (:after corfu-popupinfo
          :map corfu-popupinfo-map
          "C-<up>" #'corfu-popupinfo-scroll-down
