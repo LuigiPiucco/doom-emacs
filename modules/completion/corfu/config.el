@@ -7,6 +7,13 @@
 ;;; Packages
 (use-package! corfu
   :hook (doom-first-input . global-corfu-mode)
+  :init
+  (add-hook! 'minibuffer-setup-hook
+    (defun +corfu-enable-in-minibuffer ()
+      "Enable Corfu in the minibuffer if `completion-at-point' is bound."
+      (when (where-is-internal #'completion-at-point (list (current-local-map)))
+        (setq-local corfu-echo-delay nil)
+        (corfu-mode +1))))
   :config
   (setq corfu-auto t
         corfu-auto-delay 0.1
@@ -34,12 +41,6 @@
 
   (add-to-list 'corfu-continue-commands #'+corfu-move-to-minibuffer)
 
-  (add-hook! 'minibuffer-setup-hook
-    (defun +corfu-enable-in-minibuffer ()
-      "Enable Corfu in the minibuffer if `completion-at-point' is bound."
-      (when (where-is-internal #'completion-at-point (list (current-local-map)))
-        (setq-local corfu-echo-delay nil)
-        (corfu-mode +1))))
 
   (after! evil
     (add-hook 'evil-insert-state-exit-hook #'corfu-quit))
