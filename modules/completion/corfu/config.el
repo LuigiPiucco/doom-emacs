@@ -84,6 +84,10 @@
     ;; Set up `cape-dabbrev' options.
     (defun +dabbrev-friend-buffer-p (other-buffer)
       (< (buffer-size other-buffer) +corfu-buffer-scanning-size-limit))
+    (add-hook! (prog-mode text-mode conf-mode comint-mode minibuffer-setup
+                          eshell-mode)
+      (defun +corfu-add-cape-dabbrev-h ()
+        (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t)))
     (after! dabbrev
       (setq cape-dabbrev-check-other-buffers t
             dabbrev-friend-buffer-function #'+dabbrev-friend-buffer-p
@@ -91,12 +95,7 @@
             '("^ "
               "\\(TAGS\\|tags\\|ETAGS\\|etags\\|GTAGS\\|GRTAGS\\|GPATH\\)\\(<[0-9]+>\\)?")
             dabbrev-upcase-means-case-search t)
-      (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
-
-      (add-hook! (prog-mode text-mode conf-mode comint-mode minibuffer-setup
-                            eshell-mode)
-        (defun +corfu-add-cape-dabbrev-h ()
-          (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t)))))
+      (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)))
   ;; Complete emojis :).
   (when (and (modulep! +emoji) (> emacs-major-version 28))
     (add-hook! (prog-mode conf-mode)
