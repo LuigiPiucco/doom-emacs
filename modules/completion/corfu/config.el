@@ -3,6 +3,9 @@
 (defvar +corfu-buffer-scanning-size-limit (* 1 1024 1024) ; 1 MB
   "Size limit for a buffer to be scanned by `cape-dabbrev'.")
 
+(defvar +corfu-want-C-x-bindings t
+  "Whether `C-x' is a completion prefix in Evil insert state.")
+
 ;;
 ;;; Packages
 (use-package! corfu

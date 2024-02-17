@@ -163,14 +163,15 @@
        (:after corfu
         (:map corfu-mode-map
          :e "C-M-i" #'completion-at-point
-         (:prefix "C-x"
-          :i "C-l" #'cape-line
-          :i "C-k" #'cape-keyword
-          :i "C-f" #'cape-file
-          :i "s"   #'cape-dict
-          :i "C-s" #'yasnippet-capf
-          :i "C-n" #'cape-dabbrev
-          :i "C-p" #'cape-history)
+         (:when +corfu-want-C-x-bindings
+           (:prefix "C-x"
+            :i "C-l" #'cape-line
+            :i "C-k" #'cape-keyword
+            :i "C-f" #'cape-file
+            :i "s"   #'cape-dict
+            :i "C-s" #'yasnippet-capf
+            :i "C-n" #'cape-dabbrev
+            :i "C-p" #'cape-history))
          (:unless (modulep! :completion corfu +tng)
           :i "C-SPC" #'completion-at-point
           :n "C-SPC" (cmd! (call-interactively #'evil-insert-state)
