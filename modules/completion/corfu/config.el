@@ -42,8 +42,7 @@
   (add-to-list 'corfu-continue-commands #'+corfu-move-to-minibuffer)
 
 
-  (after! evil
-    (add-hook 'evil-insert-state-exit-hook #'corfu-quit))
+  (add-hook 'evil-insert-state-exit-hook #'corfu-quit)
 
   (when (modulep! +icons)
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
