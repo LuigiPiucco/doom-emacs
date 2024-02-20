@@ -195,8 +195,11 @@ A few variables may be set to change behavior of this module:
   recommended to leave it at that. Otherwise, single matches on snippet keys
   expand immediately.
 - [[var:+corfu-buffer-scanning-size-limit]]  ::
-    Sets the maximum buffer size to be scanned by ~cape-dabbrev~. Defaults to 1
+  Sets the maximum buffer size to be scanned by ~cape-dabbrev~. Defaults to 1
   MB. Set this if you are having performance problems using the CAPF.
+- [[var:+corfu-want-C-x-bindings]]  ::
+  Enables autocompletion backends to be bound under the ~C-x~ prefix. This
+  overrides some built-in Emacs keybindings.
 
 ** Adding CAPFs to a mode
 To add other CAPFs on a mode-per-mode basis, put either of the following in your
