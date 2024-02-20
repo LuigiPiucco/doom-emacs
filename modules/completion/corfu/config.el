@@ -17,6 +17,9 @@
       (when (where-is-internal #'completion-at-point (list (current-local-map)))
         (setq-local corfu-echo-delay nil)
         (corfu-mode +1))))
+  (when (modulep! +orderless)
+    (after! orderless
+      (setq orderless-component-separator #'orderless-escapable-split-on-space)))
   :config
   (setq corfu-auto t
         corfu-auto-delay 0.1
@@ -49,10 +52,6 @@
 
   (when (modulep! +icons)
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-
-  (when (modulep! +orderless)
-    (after! orderless
-      (setq orderless-component-separator #'orderless-escapable-split-on-space)))
 
   ;; If you want to update the visual hints after completing minibuffer commands
   ;; with Corfu and exiting, you have to do it manually.
