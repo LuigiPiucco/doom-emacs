@@ -461,8 +461,6 @@ Continues comments if executed from a commented line. Consults
   (map! :when (modulep! :completion corfu)
         :after corfu
         (:map corfu-map
-         [return] #'corfu-insert
-         "RET" #'corfu-insert
          "C-S-s" #'+corfu-move-to-minibuffer
          "C-p" #'corfu-previous
          "C-n" #'corfu-next
@@ -489,11 +487,19 @@ Continues comments if executed from a commented line. Consults
   (when-let ((cmds-del (and (modulep! :completion corfu +tng)
                             '(menu-item "Reset completion" corfu-reset
                               :enable (and (> corfu--index -1)
-                                           (eq corfu-preview-current 'insert))))))
-    (map! :after corfu
+                                           (eq corfu-preview-current 'insert)))))
+             (cmds-ret '(menu-item "Insert completion" corfu-insert
+                         :filter (lambda (cmd)
+                                   (if (eq corfu--index -1)
+                                       (corfu-quit)
+                                     cmd)))))
+    (map! :when (modulep! :completion corfu)
+          :after corfu
           :map corfu-map
           [backspace] cmds-del
-          "DEL" cmds-del))
+          "DEL" cmds-del
+          :ig [return] cmds-ret
+          :ig "RET" cmds-ret))
 
   ;; Smarter C-a/C-e for both Emacs and Evil. C-a will jump to indentation.
   ;; Pressing it again will send you to the true bol. Same goes for C-e, except
