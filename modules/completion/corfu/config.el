@@ -44,6 +44,7 @@
         ;; However, it should otherwise behave like normal, whatever normal was.
         tab-always-indent (if (modulep! +tng) 'complete tab-always-indent))
   (add-to-list 'completion-category-overrides `(lsp-capf (styles ,@completion-styles)))
+  (add-to-list 'corfu-auto-commands #'lispy-colon)
 
   (add-to-list 'corfu-continue-commands #'+corfu-move-to-minibuffer)
 
