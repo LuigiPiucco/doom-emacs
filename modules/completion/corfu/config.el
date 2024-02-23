@@ -104,11 +104,8 @@
     (add-hook! (prog-mode conf-mode)
       (defun +corfu-add-cape-emoji-h ()
         (add-hook 'completion-at-point-functions
-                  (cape-capf-inside-faces
-                   (cape-capf-prefix-length #'cape-emoji 1)
-                   ;; Only call inside comments and docstrings.
-                   'tree-sitter-hl-face:doc 'font-lock-doc-face
-                   'font-lock-comment-face 'tree-sitter-hl-face:comment)
+                  (cape-capf-predicate (cape-capf-prefix-length #'cape-emoji 1)
+                                       #'+corfu-in-doc-or-comment-p)
                   10 t)))
     (add-hook! text-mode
       (defun +corfu-add-cape-emoji-text-h ()
@@ -119,10 +116,7 @@
     (add-hook! (prog-mode conf-mode)
       (defun +corfu-add-cape-dict-h ()
         (add-hook 'completion-at-point-functions
-                  (cape-capf-inside-faces
-                   ;; Only call inside comments and docstrings.
-                   #'cape-dict 'tree-sitter-hl-face:doc 'font-lock-doc-face
-                   'font-lock-comment-face 'tree-sitter-hl-face:comment)
+                  (cape-capf-predicate #'+corfu-in-doc-or-comment-p #'cape-dict)
                   40 t)))
     (add-hook! text-mode
       (defun +corfu-add-cape-dict-text-h ()

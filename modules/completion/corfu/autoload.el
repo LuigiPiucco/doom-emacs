@@ -49,3 +49,18 @@
          ;; Without this corfu quits immediately.
          (setq this-command #'corfu-insert-separator)
          (call-interactively #'corfu-insert-separator))))
+
+;;;###autoload
+(defun +corfu-in-doc-or-comment-p (_sym)
+  "Return non-nil if point is in a docstring or comment."
+  (or (nth 4 (syntax-ppss))
+      (when-let ((faces '(font-lock-comment-face
+                          font-lock-doc-face
+                          tree-sitter-hl-face:doc
+                          tree-sitter-hl-face:comment))
+                 (fs (get-text-property (point) 'face)))
+        (if (listp fs)
+            (cl-loop for f in fs
+                     if (memq f faces)
+                     return t)
+          (memq fs faces)))))
