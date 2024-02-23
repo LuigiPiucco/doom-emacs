@@ -480,22 +480,22 @@ Continues comments if executed from a commented line. Consults
          "C-S-u" (cmd! (funcall-interactively #'corfu-popupinfo-scroll-down corfu-popupinfo-min-height))
          "C-S-d" (cmd! (funcall-interactively #'corfu-popupinfo-scroll-up corfu-popupinfo-min-height)))
         (:map corfu-map
-         "C-<return>" '(menu-item "Conclude the minibuffer" exit-minibuffer
-                        :filter (lambda (cmd) (when (minibufferp nil t) cmd)))
-         "S-<return>" '(menu-item "Insert completion and conclude"
-                        +corfu-complete-and-exit-minibuffer
-                        :filter (lambda (cmd) (when (minibufferp nil t) cmd)))))
+         "C-<return>" `(menu-item "Conclude the minibuffer" exit-minibuffer
+                                 :filter ,(lambda (cmd) (when (minibufferp nil t) cmd)))
+         "S-<return>" `(menu-item "Insert completion and conclude"
+                                 +corfu-complete-and-exit-minibuffer
+                                 :filter ,(lambda (cmd) (when (minibufferp nil t) cmd)))))
   (when-let ((cmds-del (and (modulep! :completion corfu +tng)
-                            '(menu-item "Reset completion" corfu-reset
-                              :filter (lambda (cmd)
-                                        (when (and (>= corfu--index 0)
-                                                   (eq corfu-preview-current 'insert))
-                                          cmd)))))
-             (cmds-ret '(menu-item "Insert completion" corfu-insert
-                         :filter (lambda (cmd)
-                                   (if (eq corfu--index -1)
-                                       (corfu-quit)
-                                     cmd)))))
+                            `(menu-item "Reset completion" corfu-reset
+                                       :filter ,(lambda (cmd)
+                                                 (when (and (>= corfu--index 0)
+                                                            (eq corfu-preview-current 'insert))
+                                                   cmd)))))
+             (cmds-ret `(menu-item "Insert completion" corfu-insert
+                                  :filter ,(lambda (cmd)
+                                            (if (eq corfu--index -1)
+                                                (corfu-quit)
+                                              cmd)))))
     (map! :when (modulep! :completion corfu)
           :after corfu
           :map corfu-map
