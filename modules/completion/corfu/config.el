@@ -6,6 +6,11 @@
 (defvar +corfu-want-C-x-bindings t
   "Whether `C-x' is a completion prefix in Evil insert state.")
 
+(defvar +corfu-want-minibuffer-completion t
+  "Whether to enable Corfu in the minibuffer.
+Setting this to `aggressive' will enable Corfu in more commands which
+use the minibuffer such as `query-replace'.")
+
 ;;
 ;;; Packages
 (use-package! corfu
@@ -13,8 +18,20 @@
   :init
   (add-hook! 'minibuffer-setup-hook
     (defun +corfu-enable-in-minibuffer ()
-      "Enable Corfu in the minibuffer if `completion-at-point' is bound."
-      (when (where-is-internal #'completion-at-point (list (current-local-map)))
+      "Enable Corfu in the minibuffer."
+      (when (pcase +corfu-want-minibuffer-completion
+              ('aggressive
+               (not (or (bound-and-true-p mct--active)
+                        (bound-and-true-p vertico--input)
+                        (eq (current-local-map) read-passwd-map)
+                        (and (featurep 'helm-core) (helm--alive-p))
+                        (and (featurep 'ido) (ido-active))
+                        (where-is-internal 'minibuffer-complete
+                                           (list (current-local-map)))
+                        (memq #'ivy--queue-exhibit post-command-hook))))
+              ('nil nil)
+              (_ (where-is-internal #'completion-at-point
+                                    (list (current-local-map)))))
         (setq-local corfu-echo-delay nil)
         (corfu-mode +1))))
   (when (modulep! +orderless)
