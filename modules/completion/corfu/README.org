@@ -13,6 +13,7 @@ and highly non-native, but has some extra features and more maturity.
 
 ** Maintainers
 - [[doom-user:][@LuigiPiucco]]
+- [[doom-user:][@LemonBreezes]]
 
 [[doom-contrib-maintainer:][Become a maintainer?]]
 
