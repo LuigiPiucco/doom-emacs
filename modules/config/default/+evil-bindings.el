@@ -168,13 +168,13 @@
          :v "C-SPC" (cmd! (call-interactively #'evil-change)
                           (call-interactively #'completion-at-point)))
         (:map corfu-map
-         :i "C-SPC" #'corfu-insert-separator
-         "C-k" #'corfu-previous
-         "C-j" #'corfu-next
-         "C-u" (cmd! (let (corfu-cycle)
-                       (funcall-interactively #'corfu-next (- corfu-count))))
-         "C-d" (cmd! (let (corfu-cycle)
-                       (funcall-interactively #'corfu-next corfu-count)))))
+          "C-SPC" #'corfu-insert-separator
+          "C-k" #'corfu-previous
+          "C-j" #'corfu-next
+          "C-u" (cmd! (let (corfu-cycle)
+                        (funcall-interactively #'corfu-next (- corfu-count))))
+          "C-d" (cmd! (let (corfu-cycle)
+                        (funcall-interactively #'corfu-next corfu-count)))))
        (:after corfu-popupinfo
         :map corfu-popupinfo-map
         "C-h"      #'corfu-popupinfo-toggle
