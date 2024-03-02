@@ -133,7 +133,7 @@ use the minibuffer such as `query-replace'.")
     (add-hook! (prog-mode conf-mode)
       (defun +corfu-add-cape-dict-h ()
         (add-hook 'completion-at-point-functions
-                  (cape-capf-predicate #'+corfu-in-doc-or-comment-p #'cape-dict)
+                  (cape-capf-predicate #'cape-dict #'+corfu-in-doc-or-comment-p)
                   40 t)))
     (add-hook! text-mode
       (defun +corfu-add-cape-dict-text-h ()
