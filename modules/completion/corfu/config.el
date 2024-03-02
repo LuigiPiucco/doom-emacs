@@ -113,7 +113,7 @@ use the minibuffer such as `query-replace'.")
             dabbrev-friend-buffer-function #'+dabbrev-friend-buffer-p
             dabbrev-ignored-buffer-regexps
             '("^ "
-              "\\(TAGS\\|tags\\|ETAGS\\|etags\\|GTAGS\\|GRTAGS\\|GPATH\\)\\(<[0-9]+>\\)?")
+              "\\(?:TAGS\\|tags\\|ETAGS\\|etags\\|GTAGS\\|GRTAGS\\|GPATH\\)\\(?:<[0-9]+>\\)?")
             dabbrev-upcase-means-case-search t)
       (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)))
   ;; Complete emojis :).
