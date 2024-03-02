@@ -51,7 +51,7 @@
          (call-interactively #'corfu-insert-separator))))
 
 ;;;###autoload
-(defun +corfu-in-doc-or-comment-p (_sym)
+(defun +corfu-in-doc-or-comment-p (&optional _sym)
   "Return non-nil if point is in a docstring or comment."
   (or (nth 4 (syntax-ppss))
       (when-let ((faces '(font-lock-comment-face
