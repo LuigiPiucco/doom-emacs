@@ -11,3 +11,6 @@
   (package! corfu-terminal :pin "501548c3d51f926c687e8cd838c5865ec45d03cc"))
 (when (modulep! :editor snippets)
   (package! yasnippet-capf :pin "db12b55cd08b614cbba134008566e48d7faf660e"))
+(unless (featurep :system 'windows)
+  (package! fish-completion :pin "d34d0b96fde63feedf13c4288183d8d4d4d748cf")
+  (package! bash-completion :pin "f1daac0386c24cbe8a244a62c7588cc6847b07ae"))

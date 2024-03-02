@@ -163,6 +163,15 @@ use the minibuffer such as `query-replace'.")
   :when (not (display-graphic-p))
   :hook ((corfu-mode . corfu-terminal-mode)))
 
+(use-package! fish-completion
+  :commands turn-on-fish-completion-mode
+  :unless (featurep :system 'windows)
+  :init
+  (setq fish-completion-fallback-on-bash-p t
+        fish-completion-inhibit-missing-fish-command-warning t)
+  ;; Enable Fish autocompletion in `read-shell-command'.
+  (advice-add #'shell-completion-vars :after #'turn-on-fish-completion-mode))
+
 ;;
 ;;; Extensions
 
