@@ -53,7 +53,7 @@
 ;;;###autoload
 (defun +corfu-in-doc-or-comment-p (&optional _sym)
   "Return non-nil if point is in a docstring or comment."
-  (or (nth 4 (syntax-ppss))
+  (or (nth 4 (syntax-ppss)) ; in a comment
       (when-let ((faces '(font-lock-comment-face
                           font-lock-doc-face
                           tree-sitter-hl-face:doc
