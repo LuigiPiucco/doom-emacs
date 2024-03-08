@@ -42,6 +42,7 @@ Possible values are:
   (when (modulep! +orderless)
     (after! orderless
       (setq orderless-component-separator #'orderless-escapable-split-on-space)))
+  (setq tab-always-indent 'complete)
   :config
   (setq corfu-auto t
         corfu-auto-delay 0.1
@@ -61,8 +62,7 @@ Possible values are:
         corfu-preview-current 'insert
         corfu-on-exact-match nil
         corfu-quit-at-boundary (if (modulep! +orderless) 'separator t)
-        corfu-quit-no-match (if (modulep! +orderless) 'separator t)
-        tab-always-indent 'complete)
+        corfu-quit-no-match (if (modulep! +orderless) 'separator t))
   (add-to-list 'completion-category-overrides `(lsp-capf (styles ,@completion-styles)))
   (add-to-list 'corfu-auto-commands #'lispy-colon)
   (add-to-list 'corfu-continue-commands #'+corfu-move-to-minibuffer)
