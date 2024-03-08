@@ -472,14 +472,12 @@ Continues comments if executed from a commented line. Consults
   (let ((cmds-del
           `(menu-item "Reset completion" corfu-reset
              :filter ,(lambda (cmd)
-                        (interactive)
                         (when (and (>= corfu--index 0)
                                    (eq corfu-preview-current 'insert))
                           cmd))))
         (cmds-ret
           `(menu-item "Insert completion DWIM" corfu-insert
              :filter ,(lambda (cmd)
-                        (interactive)
                         (cond ((null +corfu-want-ret-to-confirm)
                                (corfu-quit))
                               ((or (not (minibufferp nil t))
