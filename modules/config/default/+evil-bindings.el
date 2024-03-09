@@ -75,9 +75,6 @@
                       #'evil-jump-item)
       ;; Extend smart tab for specific modes. This way, we process the entire
       ;; smart tab logic and only fall back to these commands at the end.
-      (:when (modulep! :completion corfu)
-       (:after corfu :map corfu-map
-        [remap indent-for-tab-command] #'corfu-next))
       (:when (modulep! :lang org)
        (:after org :map org-mode-map
         [remap indent-for-tab-command]

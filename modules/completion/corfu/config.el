@@ -16,6 +16,18 @@ Possible values are:
               and immediatelly exit if in the minibuffer;
 - nil: Pass-through without inserting.")
 
+(defvar +corfu-want-tab-prefer-expand-snippets nil
+  "If non-nil, prefer expanding snippets over selecting completions with
+TAB.")
+
+(defvar +corfu-want-tab-prefer-navigating-snippets nil
+  "If non-nil, prefer navigating active snippets over selecting
+completions with TAB/<backtab>.")
+
+(defvar +corfu-want-tab-prefer-navigating-org-tables nil
+  "If non-nil, prefer navigating org tables over selecting completions with
+TAB/<backtab>.")
+
 ;;
 ;;; Packages
 (use-package! corfu

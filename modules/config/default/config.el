@@ -487,25 +487,31 @@ Continues comments if executed from a commented line. Consults
          `(menu-item "Select next candidate or expand/traverse snippet" corfu-next
            :filter ,(lambda (cmd)
                       (cond ((and (modulep! :editor snippets)
+                                  +corfu-want-tab-prefer-navigating-snippets
                                   (+yas-active-p))
                              #'yas-next-field-or-maybe-expand)
                             ((and (modulep! :editor snippets)
+                                  +corfu-want-tab-prefer-expand-snippets
                                   (yas-maybe-expand-abbrev-key-filter 'yas-expand))
                              #'yas-expand)
-                            (t
-                             cmd)))))
+                            ((and (modulep! :lang org)
+                                  +corfu-want-tab-prefer-navigating-org-tables
+                                  (org-at-table-p))
+                             #'org-table-next-field)
+                            (t cmd)))))
         (cmds-s-tab
          `(menu-item "Select previous candidate or expand/traverse snippet"
            corfu-previous
            :filter ,(lambda (cmd)
                       (cond ((and (modulep! :editor snippets)
+                                  +corfu-want-tab-prefer-navigating-snippets
                                   (+yas-active-p))
                              #'yas-prev-field)
-                            ((and (modulep! :editor snippets)
-                                  (yas-maybe-expand-abbrev-key-filter 'yas-expand))
-                             #'yas-expand)
-                            (t
-                             cmd))))))
+                            ((and (modulep! :lang org)
+                                  +corfu-want-tab-prefer-navigating-org-tables
+                                  (org-at-table-p))
+                             #'org-table-previous-field)
+                            (t cmd))))))
     (map! :when (modulep! :completion corfu)
           :map corfu-map
           [backspace] cmds-del
@@ -514,8 +520,8 @@ Continues comments if executed from a commented line. Consults
           :gi "RET" cmds-ret
           "S-TAB" cmds-s-tab
           [backtab] cmds-s-tab
-          "TAB" cmds-tab
-          [tab] cmds-tab))
+          :gi "TAB" cmds-tab
+          :gi [tab] cmds-tab))
 
   ;; Smarter C-a/C-e for both Emacs and Evil. C-a will jump to indentation.
   ;; Pressing it again will send you to the true bol. Same goes for C-e, except
