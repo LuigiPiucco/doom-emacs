@@ -53,6 +53,9 @@
                                (and (featurep 'corfu-terminal)
                                     (popon-live-p corfu-terminal--popon))))
                       #'corfu-next
+                      (and (modulep! :lang org)
+                           (org-at-table-p))
+                      #'org-table-next-field
                       (and (modulep! :completion corfu)
                            (bound-and-true-p corfu-mode))
                       #'indent-for-tab-command)
