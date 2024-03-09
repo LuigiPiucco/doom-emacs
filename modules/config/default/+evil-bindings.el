@@ -41,11 +41,22 @@
 (map! :i [tab] (cmds! (and (modulep! :editor snippets)
                            (yas-maybe-expand-abbrev-key-filter 'yas-expand))
                       #'yas-expand
+                      (and (modulep! :editor snippets)
+                           (> (point) (point-min))
+                           (memq yas--active-field-overlay
+                                 (overlays-at (1- (point)))))
+                      #'yas-next-field-or-maybe-expand
                       (and (bound-and-true-p company-mode)
                            (modulep! :completion company +tng))
                       #'company-indent-or-complete-common
-                      (and (bound-and-true-p corfu-mode)
-                           (modulep! :completion corfu))
+                      (and (modulep! :completion corfu)
+                           (or (and (frame-live-p corfu--frame)
+                                    (frame-visible-p corfu--frame))
+                               (and (featurep 'corfu-terminal)
+                                    (popon-live-p corfu-terminal--popon))))
+                      #'corfu-next
+                      (and (modulep! :completion corfu)
+                           (bound-and-true-p corfu-mode))
                       #'indent-for-tab-command)
       :m [tab] (cmds! (and (modulep! :editor snippets)
                            (evil-visual-state-p)
