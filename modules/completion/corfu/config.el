@@ -67,7 +67,12 @@ Possible values are:
   (add-to-list 'corfu-auto-commands #'lispy-colon)
   (add-to-list 'corfu-continue-commands #'+corfu-move-to-minibuffer)
   (add-to-list 'corfu-continue-commands #'+corfu-smart-sep-toggle-escape)
-  (add-hook 'evil-insert-state-exit-hook #'corfu-quit)
+  (add-hook! 'evil-insert-state-exit-hook
+    (defun +corfu-quit-on-insert-exit-h ()
+      ;; This is a workaround for Corfu exiting when showing the popup
+      ;; help for `yasnippet-capf'.
+      (when (eq (window-buffer) (current-buffer))
+        (corfu-quit))))
 
   (when (modulep! +icons)
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
