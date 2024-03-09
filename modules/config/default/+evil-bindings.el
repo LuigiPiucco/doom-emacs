@@ -48,15 +48,6 @@
                            (modulep! :completion company +tng))
                       #'company-indent-or-complete-common
                       (and (modulep! :completion corfu)
-                           (or (and (frame-live-p corfu--frame)
-                                    (frame-visible-p corfu--frame))
-                               (and (featurep 'corfu-terminal)
-                                    (popon-live-p corfu-terminal--popon))))
-                      #'corfu-next
-                      (and (modulep! :lang org)
-                           (org-at-table-p))
-                      #'org-table-next-field
-                      (and (modulep! :completion corfu)
                            (bound-and-true-p corfu-mode))
                       #'indent-for-tab-command)
       :m [tab] (cmds! (and (modulep! :editor snippets)
@@ -82,6 +73,16 @@
                       it
                       (fboundp 'evil-jump-item)
                       #'evil-jump-item)
+      ;; Extend smart tab for specific modes. This way, we process the entire
+      ;; smart tab logic and only fall back to these commands at the end.
+      (:when (modulep! :completion corfu)
+       (:after corfu :map corfu-map
+        [remap indent-for-tab-command] #'corfu-next))
+      (:when (modulep! :lang org)
+       (:after org :map org-mode-map
+        [remap indent-for-tab-command]
+        `(menu-item "Go to the next field" org-table-next-field
+          :filter ,(lambda (cmd) (when (org-at-table-p) cmd)))))
 
       (:after help :map help-mode-map
        :n "o"       #'link-hint-open-link)
@@ -102,9 +103,9 @@
        :n "o"    #'link-hint-open-link)
 
       (:unless (modulep! :input layout +bepo)
-        (:after (evil-org evil-easymotion)
-         :map evil-org-mode-map
-         :m "gsh" #'+org/goto-visible))
+       (:after (evil-org evil-easymotion)
+        :map evil-org-mode-map
+        :m "gsh" #'+org/goto-visible))
 
       (:when (modulep! :editor multiple-cursors)
        :prefix "gz"
