@@ -42,9 +42,7 @@
                            (yas-maybe-expand-abbrev-key-filter 'yas-expand))
                       #'yas-expand
                       (and (modulep! :editor snippets)
-                           (> (point) (point-min))
-                           (memq yas--active-field-overlay
-                                 (overlays-at (1- (point)))))
+                           (+yas-active-p))
                       #'yas-next-field-or-maybe-expand
                       (and (bound-and-true-p company-mode)
                            (modulep! :completion company +tng))

@@ -463,36 +463,59 @@ Continues comments if executed from a commented line. Consults
          "C-S-s" #'+corfu-move-to-minibuffer
          "C-p" #'corfu-previous
          "C-n" #'corfu-next
-         "S-TAB" #'corfu-previous
-         [backtab] #'corfu-previous
-         "TAB" #'corfu-next
-         [tab] #'corfu-next
          (:when (modulep! :completion corfu +orderless)
           [remap corfu-insert-separator] #'+corfu-smart-sep-toggle-escape)))
   (let ((cmds-del
-          `(menu-item "Reset completion" corfu-reset
-             :filter ,(lambda (cmd)
-                        (when (and (>= corfu--index 0)
-                                   (eq corfu-preview-current 'insert))
-                          cmd))))
+         `(menu-item "Reset completion" corfu-reset
+           :filter ,(lambda (cmd)
+                      (when (and (>= corfu--index 0)
+                                 (eq corfu-preview-current 'insert))
+                        cmd))))
         (cmds-ret
-          `(menu-item "Insert completion DWIM" corfu-insert
-             :filter ,(lambda (cmd)
-                        (cond ((null +corfu-want-ret-to-confirm)
-                               (corfu-quit))
-                              ((or (not (minibufferp nil t))
-                                   (eq +corfu-want-ret-to-confirm t))
-                               (when (>= corfu--index 0) cmd))
-                              ((eq +corfu-want-ret-to-confirm 'minibuffer)
-                               (funcall-interactively cmd)
-                               nil)
-                              (t cmd))))))
+         `(menu-item "Insert completion DWIM" corfu-insert
+           :filter ,(lambda (cmd)
+                      (cond ((null +corfu-want-ret-to-confirm)
+                             (corfu-quit))
+                            ((or (not (minibufferp nil t))
+                                 (eq +corfu-want-ret-to-confirm t))
+                             (when (>= corfu--index 0) cmd))
+                            ((eq +corfu-want-ret-to-confirm 'minibuffer)
+                             (funcall-interactively cmd)
+                             nil)
+                            (t cmd)))))
+        (cmds-tab
+         `(menu-item "Select next candidate or expand/traverse snippet" corfu-next
+           :filter ,(lambda (cmd)
+                      (cond ((and (modulep! :editor snippets)
+                                  (yas-maybe-expand-abbrev-key-filter 'yas-expand))
+                             #'yas-expand)
+                            ((and (modulep! :editor snippets)
+                                  (+yas-active-p))
+                             #'yas-next-field-or-maybe-expand)
+                            (t
+                             cmd)))))
+        (cmds-s-tab
+         `(menu-item "Select previous candidate or expand/traverse snippet"
+           corfu-previous
+           :filter ,(lambda (cmd)
+                      (cond ((and (modulep! :editor snippets)
+                                  (yas-maybe-expand-abbrev-key-filter 'yas-expand))
+                             #'yas-expand)
+                            ((and (modulep! :editor snippets)
+                                  (+yas-active-p))
+                             #'yas-prev-field)
+                            (t
+                             cmd))))))
     (map! :when (modulep! :completion corfu)
           :map corfu-map
           [backspace] cmds-del
           "DEL" cmds-del
           :gi [return] cmds-ret
-          :gi "RET" cmds-ret))
+          :gi "RET" cmds-ret
+          "S-TAB" cmds-s-tab
+          [backtab] cmds-s-tab
+          "TAB" cmds-tab
+          [tab] cmds-tab))
 
   ;; Smarter C-a/C-e for both Emacs and Evil. C-a will jump to indentation.
   ;; Pressing it again will send you to the true bol. Same goes for C-e, except
