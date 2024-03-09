@@ -45,8 +45,8 @@
                            (modulep! :completion company +tng))
                       #'company-indent-or-complete-common
                       (and (bound-and-true-p corfu-mode)
-                           (modulep! :completion corfu +tng))
-                      #'completion-at-point)
+                           (modulep! :completion corfu))
+                      #'indent-for-tab-command)
       :m [tab] (cmds! (and (modulep! :editor snippets)
                            (evil-visual-state-p)
                            (or (eq evil-visual-selection 'line)
