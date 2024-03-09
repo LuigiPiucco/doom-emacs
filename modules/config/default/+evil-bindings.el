@@ -39,11 +39,11 @@
 
 ;; Smart tab, these will only work in GUI Emacs
 (map! :i [tab] (cmds! (and (modulep! :editor snippets)
-                           (yas-maybe-expand-abbrev-key-filter 'yas-expand))
-                      #'yas-expand
-                      (and (modulep! :editor snippets)
                            (+yas-active-p))
                       #'yas-next-field-or-maybe-expand
+                      (and (modulep! :editor snippets)
+                           (yas-maybe-expand-abbrev-key-filter 'yas-expand))
+                      #'yas-expand
                       (and (bound-and-true-p company-mode)
                            (modulep! :completion company +tng))
                       #'company-indent-or-complete-common

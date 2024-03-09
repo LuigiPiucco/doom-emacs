@@ -487,11 +487,11 @@ Continues comments if executed from a commented line. Consults
          `(menu-item "Select next candidate or expand/traverse snippet" corfu-next
            :filter ,(lambda (cmd)
                       (cond ((and (modulep! :editor snippets)
-                                  (yas-maybe-expand-abbrev-key-filter 'yas-expand))
-                             #'yas-expand)
-                            ((and (modulep! :editor snippets)
                                   (+yas-active-p))
                              #'yas-next-field-or-maybe-expand)
+                            ((and (modulep! :editor snippets)
+                                  (yas-maybe-expand-abbrev-key-filter 'yas-expand))
+                             #'yas-expand)
                             (t
                              cmd)))))
         (cmds-s-tab
@@ -499,11 +499,11 @@ Continues comments if executed from a commented line. Consults
            corfu-previous
            :filter ,(lambda (cmd)
                       (cond ((and (modulep! :editor snippets)
-                                  (yas-maybe-expand-abbrev-key-filter 'yas-expand))
-                             #'yas-expand)
-                            ((and (modulep! :editor snippets)
                                   (+yas-active-p))
                              #'yas-prev-field)
+                            ((and (modulep! :editor snippets)
+                                  (yas-maybe-expand-abbrev-key-filter 'yas-expand))
+                             #'yas-expand)
                             (t
                              cmd))))))
     (map! :when (modulep! :completion corfu)
