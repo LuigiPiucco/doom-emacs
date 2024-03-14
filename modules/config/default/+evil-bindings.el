@@ -38,41 +38,49 @@
 ;;; Global keybindings
 
 ;; Smart tab, these will only work in GUI Emacs
-(map! :i [tab] (cmds! (and (modulep! :editor snippets)
-                           (+yas-active-p))
-                      #'yas-next-field-or-maybe-expand
-                      (and (modulep! :editor snippets)
-                           (yas-maybe-expand-abbrev-key-filter 'yas-expand))
-                      #'yas-expand
-                      (and (bound-and-true-p company-mode)
-                           (modulep! :completion company +tng))
-                      #'company-indent-or-complete-common
-                      (and (modulep! :completion corfu)
-                           (bound-and-true-p corfu-mode))
-                      #'indent-for-tab-command)
-      :m [tab] (cmds! (and (modulep! :editor snippets)
-                           (evil-visual-state-p)
-                           (or (eq evil-visual-selection 'line)
-                               (not (memq (char-after) (list ?\( ?\[ ?\{ ?\} ?\] ?\))))))
-                      #'yas-insert-snippet
-                      (and (modulep! :editor fold)
-                           (save-excursion (end-of-line) (invisible-p (point))))
-                      #'+fold/toggle
-                      ;; Fixes #4548: without this, this tab keybind overrides
-                      ;; mode-local ones for modes that don't have an evil
-                      ;; keybinding scheme or users who don't have :editor (evil
-                      ;; +everywhere) enabled.
-                      (or (doom-lookup-key
-                           [tab]
-                           (list (evil-get-auxiliary-keymap (current-local-map) evil-state)
-                                 (current-local-map)))
-                          (doom-lookup-key
-                           (kbd "TAB")
-                           (list (evil-get-auxiliary-keymap (current-local-map) evil-state)))
-                          (doom-lookup-key (kbd "TAB") (list (current-local-map))))
-                      it
-                      (fboundp 'evil-jump-item)
-                      #'evil-jump-item)
+(map! :i [tab]
+      `(menu-item "Evil insert smart tab" nil :filter
+        (lambda (cmd)
+          (cond ,@(when (modulep! :editor snippets)
+                    '(((+yas-active-p)
+                       #'yas-next-field-or-maybe-expand
+                       (yas-maybe-expand-abbrev-key-filter 'yas-expand)
+                       #'yas-expand)))
+                ,@(when (modulep! :completion company +tng)
+                    '(((bound-and-true-p company-mode)
+                       #'company-indent-or-complete-common)))
+                ,@(when (modulep! :completion corfu)
+                    '(((bound-and-true-p corfu-mode)
+                       #'indent-for-tab-command))))))
+      :m [tab]
+      `(menu-item "Evil motion smart tab" nil :filter
+        (lambda (cmd)
+          (cond ,@(when (modulep! :editor snippets)
+                    '(((and (evil-visual-state-p)
+                            (or (eq evil-visual-selection 'line)
+                                (not (memq (char-after)
+                                           (list ?\( ?\[ ?\{ ?\} ?\] ?\))))))
+                       #'yas-insert-snippet)))
+                ,@(when (modulep! :editor fold)
+                    '(((save-excursion (end-of-line) (invisible-p (point)))
+                       #'+fold/toggle)))
+                ;; Fixes #4548: without this, this tab keybind overrides
+                ;; mode-local ones for modes that don't have an evil
+                ;; keybinding scheme or users who don't have :editor (evil
+                ;; +everywhere) enabled.
+                ((or (doom-lookup-key
+                      [tab]
+                      (list (evil-get-auxiliary-keymap (current-local-map)
+                                                       evil-state)
+                            (current-local-map)))
+                     (doom-lookup-key
+                      (kbd "TAB")
+                      (list (evil-get-auxiliary-keymap (current-local-map)
+                                                       evil-state)))
+                     (doom-lookup-key (kbd "TAB") (list (current-local-map))))
+                 cmd)
+                ((fboundp 'evil-jump-item)
+                 #'evil-jump-item))))
       ;; Extend smart tab for specific modes. This way, we process the entire
       ;; smart tab logic and only fall back to these commands at the end.
       (:when (modulep! :lang org)
